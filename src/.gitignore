@@ -1,0 +1,18 @@
+# Ignore generated files
+build.asm
+
+# Ignore generated binary files
+bf.exe
+bf.exe.js
+
+# Ignore MAC files
+.DS_Store
+
+# Ignore generated symbol files
+SYMBOLS.SYM
+
+# Ignore local build settings
+src/*.toml
+
+# Ignore local build script
+created
