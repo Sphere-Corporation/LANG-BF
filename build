@@ -8,8 +8,9 @@
 #
 # Requires Python 3.9 or newer
 #
-# 0.0.1     28-NOV-2023     Initial release with                    GAME-TT
-# 0.0.2     04-DEC-2023     Improved assembly error processing      LANG-BF
+# 0.0.1     28-NOV-2023     GAME-TT     Initial release
+# 0.0.2     04-DEC-2023     LANG-BF     Improved assembly error processing          
+#                                       Added versionJustify and NLAfterBuildVersion settings
 
 
 # Import system libraries
@@ -33,6 +34,18 @@ KEY_DOES_NOT_EXIST          = "Configuration Key: {0} does not exist."
 SECTION_DOES_NOT_EXIST      = "Configuration Section: {0} does not exist within {1}."
 
 
+def CamelCase(s):
+ 
+  newString = ''
+  newString += s[0].upper()
+
+  for k in range(1, len(s)): 
+    if s[k] == ' ':
+      newString += s[k + 1].upper()
+      k += 1
+    elif s[k - 1] != ' ':
+      newString += s[k]
+  return newString
 
 def date_2_julian_string (date):
     return str(date.strftime('%Y')) + date.strftime('%j')
@@ -70,10 +83,21 @@ def validate_section(config_info, section, silent, spaces, filename):
         click.secho(error_message, fg="red")
         exit()
 
-def construct_build_line(build):
+def construct_build_line(build, buildJustify, NLAfterBuildVersion):
     version_literal="VERSION:" + build
-    spc = (round((32-(len(version_literal)))/2))
-    fullline = "BUILD   .AZ  /" + ''.join([char*spc for char in ' ']) + version_literal + '/'
+    if buildJustify == "C":
+        spc = (round((32-(len(version_literal)))/2))
+        fullline = "BUILD   .AZ  /" + ''.join([char*spc for char in ' ']) + version_literal + '/'
+
+    if buildJustify == "L":
+        fullline = "BUILD   .AZ  /" + version_literal + '/'
+    
+    if buildJustify == "R":
+        spc = (round(32-(len(version_literal))))
+        fullline = "BUILD   .AZ  /" + ''.join([char*spc for char in ' ']) + version_literal + '/'
+        
+    if NLAfterBuildVersion == "True":
+        fullline = fullline + ",#$0D"
     return fullline
 
 @click.command()
@@ -169,13 +193,17 @@ def cli(config, build, silent):
     flags           = default_key(config["BuildParameters"],"flags", None, False,"BuildParameters", THIS_CONFIG_FILE)
     cassette        = default_key(config["BuildParameters"],"cassette", "", False,"BuildParameters", THIS_CONFIG_FILE)
     
-    buildASM        = default_key(config["Miscellaneous"],"buildASM", "", True,"Miscellaneous", THIS_CONFIG_FILE)
+    buildASM            = default_key(config["Miscellaneous"],"buildASM", "", True,"Miscellaneous", THIS_CONFIG_FILE)
+    buildJustify        = default_key(config["Miscellaneous"],"buildJustify", "", False,"Miscellaneous", THIS_CONFIG_FILE)
+    NLAfterBuildVersion = default_key(config["Miscellaneous"],"NLAfterBuildVersion", True, False,"Miscellaneous", THIS_CONFIG_FILE)
+    
+    NLAfterBuildVersion = CamelCase(str(NLAfterBuildVersion))
     
     if not(silent):
         click.secho('Building Version: ' + build + '\n', fg="blue")
 
     if not(silent):
-        fullline = construct_build_line(build)
+        fullline = construct_build_line(build, buildJustify, NLAfterBuildVersion)
         buildASMFile = srcDir + buildASM
         click.secho('Auto-generating build version file.\n', fg="blue")
 

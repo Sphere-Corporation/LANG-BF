@@ -9,6 +9,7 @@ cell_index = 0
 user_input = []
 loop_table = {}
 
+# Pass 1 - construct while:loop table
 loop_stack = []
 for ip, instruction in enumerate(program):
 	if instruction == "[":
@@ -17,7 +18,8 @@ for ip, instruction in enumerate(program):
 		loop_beginning_index = loop_stack.pop()
 		loop_table[loop_beginning_index] = ip
 		loop_table[ip] = loop_beginning_index
-
+    
+# Pass 2 - Interpret the code
 ip = 0
 while ip < len(program):
 	instruction = program[ip]
