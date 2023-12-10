@@ -8,6 +8,6 @@ TP       .DA     2             ; Tape pointer
 IP       .DA     2             ; Input pointer
 
 ;PROGRAM  .AZ     />++++++++[-<+++++++++>]<.>>+>-[+]++>++>+++[>[->+++<<+++>]<<]>-----.>->+++..+++.>-.<<+[>[+>+]>>]<--------------.>>.+++.------.--------.>+.>+./
-PROGRAM  .AZ     /.,./
-TAPE     .AZ     /AX/
+PROGRAM  .AZ     /.>.>.>.>./
+TAPE     .AZ     /ABCDEFG/
 INPUT    .AZ     /1/

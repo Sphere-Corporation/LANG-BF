@@ -44,16 +44,16 @@ AROUND  LDX     PC
         BEQ     OUTPUT         ; If it is an output instruction, skip to the OUTPUT
 
         CMPA    PLUS           ;
-        BEQ     INCTP          ; Is this an instruction to increment the byte at the tape pointer.
+        BEQ     INCBTP         ; Is this an instruction to increment the byte at the tape pointer.
 
         CMPA    MINUS          ;
-        BEQ     DECTP          ; Is this an instruction to decrement the byte at the tape pointer.
+        BEQ     DECBTP         ; Is this an instruction to decrement the byte at the tape pointer.
 
         CMPA    GT             ;
         BEQ     INCTP          ; Is this an instruction to increment the tape pointer.
 
         CMPA    LT             ;
-        BEQ     DECT           ; Is this an instruction to decrement the tape pointer.
+        BEQ     DECTP          ; Is this an instruction to decrement the tape pointer.
 
         CMPA    COMMA          ;
         BEQ     INP            ; Is this an instruction receive a byte of input.
@@ -67,24 +67,30 @@ OUTPUT  LDX     TP             ; Output the character at the current tape pointe
         JSR     PUTCHR
         BRA     NEXT 
 
-INCTP   LDX     TP             ; Increment the value at the current tape pointer
+INCBTP  LDX     TP             ; Increment the byte at the current tape pointer
         LDAA    0,X
-        INCA    
-        STAA    0,X
-        BRA     NEXT
+        CMPA    #$FF           ; Is the value 255 ?
+        BEQ     TO00           ; Loop round to z zero value
+        INCA
+        BRA     STASH    
+TO00    CLRA                   ; Clear AccA to switch bytes to 0
+        BRA     STASH    
 
-DECTP   LDX     TP             ; Decrement the value at the current tape pointer
+
+DECBTP  LDX     TP             ; Decrement the byte at the current tape pointer
         LDAA    0,X
-        DECA    
-        STAA    0,X
-        BRA     NEXT
+        BEQ     TOFF           ; If it's zero, ensure it's "decremented" to #$FF
+        DECA
+        BRA     STASH    
+TOFF    COMA                   ; Complement the bytes (0 -> $#FF)  
+        BRA STASH
 
-INCT    LDX     TP             ; Increment the current tape pointer
+INCTP   LDX     TP             ; Increment the current tape pointer
         INX
         STX     TP
         BRA     NEXT
 
-DECT    LDX     TP             ; Increment the current tape pointer
+DECTP   LDX     TP             ; Increment the current tape pointer
         DEX
         STX     TP
         BRA     NEXT
@@ -94,14 +100,19 @@ INP     LDX     IP             ; Accept a byte of input from the input string
         INX                    ; Increment the input pointer
         STX     IP             ; Store the input pointer
         LDX     TP             ; Load the current value of the data pointer
-        STAA    0,X            ; Store the current AccA value into the current data location
-        BRA     NEXT
+        BRA     STASH
+
 
 NEXT    LDX     PC             ; Increment program counter and store it before going back to the next
         INX                    ; instruction
         STX     PC
         BRA     AROUND         ; Go to the next instruction
 
+
+STASH   STAA    0,X            ; Common stash routine for the value in the AccA to be stored
+        BRA     NEXT           ; wherever X points
+
+        
 ; Subroutines
         .IN library            ; Include library routines
         
