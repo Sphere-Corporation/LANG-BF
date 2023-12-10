@@ -28,8 +28,11 @@ REPL    LDX     #PROMPT
         LDX     #PROGRAM       ; Store program start address in PC
         STX     PC
 
-        LDX     #TAPE          ; Store initial data pointer address in TP
-        STX     DP
+        LDX     #TAPE          ; Store initial tape pointer address in TP
+        STX     TP
+
+        LDX     #INPUT         ; Store initial input pointer address in IP
+        STX     IP
 
 INTERPT                        ; Entry point of the main interpreter
         
@@ -41,33 +44,60 @@ AROUND  LDX     PC
         BEQ     OUTPUT         ; If it is an output instruction, skip to the OUTPUT
 
         CMPA    PLUS           ;
-        BEQ     INCDP          ; Is this an instruction to increment the byte at the data pointer.
+        BEQ     INCTP          ; Is this an instruction to increment the byte at the tape pointer.
 
         CMPA    MINUS          ;
-        BEQ     DECDP          ; Is this an instruction to decrement the byte at the data pointer.
+        BEQ     DECTP          ; Is this an instruction to decrement the byte at the tape pointer.
+
+        CMPA    GT             ;
+        BEQ     INCTP          ; Is this an instruction to increment the tape pointer.
+
+        CMPA    LT             ;
+        BEQ     DECT           ; Is this an instruction to decrement the tape pointer.
+
+        CMPA    COMMA          ;
+        BEQ     INP            ; Is this an instruction receive a byte of input.
 
         BRA     NEXT
 
 DONE    JMP     REPL           ; End of program, so loop around for the next REPL
 
-OUTPUT  LDX     DP             ; Output the character at the current data pointer
+OUTPUT  LDX     TP             ; Output the character at the current tape pointer
         LDAA    0,X 
         JSR     PUTCHR
         BRA     NEXT 
 
-INCDP   LDX     DP             ; Increment the value at the current data pointer
+INCTP   LDX     TP             ; Increment the value at the current tape pointer
         LDAA    0,X
         INCA    
         STAA    0,X
         BRA     NEXT
 
-DECDP   LDX     DP             ; Decrement the value at the current data pointer
+DECTP   LDX     TP             ; Decrement the value at the current tape pointer
         LDAA    0,X
         DECA    
         STAA    0,X
         BRA     NEXT
-NEXT
-        LDX     PC             ; Increment program counter and store it before going back to the next
+
+INCT    LDX     TP             ; Increment the current tape pointer
+        INX
+        STX     TP
+        BRA     NEXT
+
+DECT    LDX     TP             ; Increment the current tape pointer
+        DEX
+        STX     TP
+        BRA     NEXT
+
+INP     LDX     IP             ; Accept a byte of input from the input string
+        LDAA    0,X            ; Get the byte of input pointed at by the input pointer
+        INX                    ; Increment the input pointer
+        STX     IP             ; Store the input pointer
+        LDX     TP             ; Load the current value of the data pointer
+        STAA    0,X            ; Store the current AccA value into the current data location
+        BRA     NEXT
+
+NEXT    LDX     PC             ; Increment program counter and store it before going back to the next
         INX                    ; instruction
         STX     PC
         BRA     AROUND         ; Go to the next instruction

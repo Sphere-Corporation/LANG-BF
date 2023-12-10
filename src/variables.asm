@@ -4,9 +4,10 @@ SCRTCHB  .DA     1             ; Space for AccB
 SCRTCHX  .DA     1             ; Space for X register
 
 PC       .DA     2             ; Program counter
-DP       .DA     2             ; Data pointer
-
+TP       .DA     2             ; Tape pointer
+IP       .DA     2             ; Input pointer
 
 ;PROGRAM  .AZ     />++++++++[-<+++++++++>]<.>>+>-[+]++>++>+++[>[->+++<<+++>]<<]>-----.>->+++..+++.>-.<<+[>[+>+]>>]<--------------.>>.+++.------.--------.>+.>+./
-PROGRAM  .AZ     /.+.-./
-TAPE     .AZ     /A/
+PROGRAM  .AZ     /.,./
+TAPE     .AZ     /AX/
+INPUT    .AZ     /1/
