@@ -1,25 +1,25 @@
-;
+
 ;
 ; Library functions 
 ;
 ;       V1.0    Released with GAME-TT                   Initial Release
 ;       V2.0    Released with LANG-BF                   Added STR,RSTR
-
+;
 ; List of functions to include in final assembly file. 
 ; Define function name preceded by an underscore, with:
 ;                                                .EQ 1 to include
 ;                                                .EQ 0 to exclude
+_CLS            .EQ     1
+_CRLF           .EQ     0
+_CURXY          .EQ     0
+_GETCHRB        .EQ     0
 _GTCHRAT        .EQ     0
 _MLTCHR         .EQ     0
-_GETCHRB        .EQ     0
-_PUTMSG         .EQ     1
-_CRLF           .EQ     0
 _MULTCR         .EQ     0
 _PRTXY          .EQ     0
-_CURXY          .EQ     0
-_CLS            .EQ     1
-_STR            .EQ     1
-_RSTR           .EQ     1
+_PUTMSG         .EQ     1
+_RSTR           .EQ     0
+_STR            .EQ     0
 ;
 ; Excluding functions not used can significantly reduce the executable size.
 ;
@@ -177,9 +177,10 @@ GETCHRB LDAA    #$40           ; Load a mask for CA2 flag.
 ;
 ; Notes:
 ;
-;       N/A
+;       Comment out the STR/RSTR if not required
 
-PUTMSG  JSR     STR            ; Store A/B/X
+PUTMSG  
+;        JSR     STR            ; Store A/B/X
         LDAA    0,X            ; Start at the beginning of the message
         BEQ     .PMEXT         ; Quit if the message is complete
         STX     .MSGIDX        ; Store the current position in the message
@@ -187,7 +188,8 @@ PUTMSG  JSR     STR            ; Store A/B/X
         LDX     .MSGIDX        ; Restore the current position in the message
         INX                    ; Increment the message position
         BRA     PUTMSG         ; Go to the next character
-.PMEXT  JSR     RSTR           ; Restore A/B/X
+.PMEXT  
+;        JSR     RSTR           ; Restore A/B/X
         RTS
 
 ; Space to store the index register

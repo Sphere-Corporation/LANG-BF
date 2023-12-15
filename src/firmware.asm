@@ -6,6 +6,8 @@ GETCHR  .EQU     $FC4A         ; Gets a single character into A (with cursor bli
 PUTCHR  .EQU     $FCBC         ; Print character at cursor
 INPCHR  .EQU     $FE71         ; Reads and displays a character
 
+EDIT    .EQU     $FC67         ; Full Screen Editor
+REEDIT  .EQU     $FC6F         ; Re-Edit existing source
 KBDPIA  .EQU     $F040         ; Address of PIA for KBD/2 (Only supports KBD/2)
 
 ; PDS Workspace

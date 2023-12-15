@@ -26,3 +26,20 @@
 # Hello World! program
 
 >++++++++[-<+++++++++>]<.>>+>-[+]++>++>+++[>[->+++<<+++>]<<]>-----.>->+++..+++.>-.<<+[>[+>+]>>]<--------------.>>.+++.------.--------.>+.>+.
+
+
+# BF Specification (as canonical as I can find)
+
+https://esolangs.org/wiki/brainfuck
+
+# Talk by BF inventor (Urban Müller)
+https://www.youtube.com/watch?v=gjm9irBs96U&t=8722s
+
+# Additional ideas:
+
+-   Maybe use `!` to indicate start of data
+-   Maybe use `#` to indicate start of input
+
+.... so the program can be in one file along with its input and data.
+
+Possibly support standard input where there is no input given

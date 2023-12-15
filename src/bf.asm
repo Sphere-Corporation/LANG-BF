@@ -15,16 +15,17 @@
 START   LDS     #$1FF          ; Stack below program
                                ; MUST be first line of code
 
-
         JSR     CLS            
         LDX     #BFMSG
         JSR     PUTMSG
         LDX     #BUILD 
         JSR     PUTMSG
+        
 REPL    LDX     #PROMPT
         JSR     PUTMSG
         JSR     INPCHR
-        
+
+RUNP
         LDX     #PROGRAM       ; Store program start address in PC
         STX     PC
 
@@ -58,9 +59,9 @@ AROUND  LDX     PC
         CMPA    COMMA          ;
         BEQ     INP            ; Is this an instruction receive a byte of input.
 
-        BRA     NEXT
+        BRA     NEXT           ; Any other character is counted as a comment.
 
-DONE    JMP     REPL           ; End of program, so loop around for the next REPL
+DONE    BRA     REPL           ; End of program, so loop around for the next REPL
 
 OUTPUT  LDX     TP             ; Output the character at the current tape pointer
         LDAA    0,X 
@@ -69,21 +70,13 @@ OUTPUT  LDX     TP             ; Output the character at the current tape pointe
 
 INCBTP  LDX     TP             ; Increment the byte at the current tape pointer
         LDAA    0,X
-        CMPA    #$FF           ; Is the value 255 ?
-        BEQ     TO00           ; Loop round to z zero value
         INCA
         BRA     STASH    
-TO00    CLRA                   ; Clear AccA to switch bytes to 0
-        BRA     STASH    
-
 
 DECBTP  LDX     TP             ; Decrement the byte at the current tape pointer
         LDAA    0,X
-        BEQ     TOFF           ; If it's zero, ensure it's "decremented" to #$FF
         DECA
-        BRA     STASH    
-TOFF    COMA                   ; Complement the bytes (0 -> $#FF)  
-        BRA STASH
+        BRA     STASH
 
 INCTP   LDX     TP             ; Increment the current tape pointer
         INX
@@ -100,8 +93,10 @@ INP     LDX     IP             ; Accept a byte of input from the input string
         INX                    ; Increment the input pointer
         STX     IP             ; Store the input pointer
         LDX     TP             ; Load the current value of the data pointer
-        BRA     STASH
+        ; BRA     STASH        ; Falls through to STASH
 
+STASH   STAA    0,X            ; Common stash routine for the value in the AccA to be stored
+        BRA     NEXT           ; wherever X points
 
 NEXT    LDX     PC             ; Increment program counter and store it before going back to the next
         INX                    ; instruction
@@ -109,10 +104,9 @@ NEXT    LDX     PC             ; Increment program counter and store it before g
         BRA     AROUND         ; Go to the next instruction
 
 
-STASH   STAA    0,X            ; Common stash routine for the value in the AccA to be stored
-        BRA     NEXT           ; wherever X points
 
-        
+
+
 ; Subroutines
         .IN library            ; Include library routines
         
