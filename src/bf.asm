@@ -20,23 +20,34 @@ START   LDS     #$1FF          ; Stack below program
         JSR     PUTMSG
         LDX     #BUILD 
         JSR     PUTMSG
-        
+
 REPL    LDX     #PROMPT
         JSR     PUTMSG
         JSR     INPCHR
 
 RUNP
-        LDX     #PROGRAM       ; Store program start address in PC
-        STX     PC
-
         LDX     #TAPE          ; Store initial tape pointer address in TP
         STX     TP
 
         LDX     #INPUT         ; Store initial input pointer address in IP
         STX     IP
+        
+
 
 INTERPT                        ; Entry point of the main interpreter
         
+        LDX     #PROGRAM       ; Load program start address into the X-register
+        
+        
+PHASE1  
+
+
+
+PHASE2                         ; Phase 2 of the interpreter - start running the instructions
+
+        LDX     #PROGRAM       ; Load program start address into the X-register and store in PC
+        STX     PC
+
 AROUND  LDX     PC 
         LDAA    0,X            ; Load current program instruction
         BEQ     DONE           ; If the end of the program has been reached, exit back to the REPL
@@ -59,9 +70,15 @@ AROUND  LDX     PC
         CMPA    COMMA          ;
         BEQ     INP            ; Is this an instruction receive a byte of input.
 
+        CMPA    OPEN 
+        BEQ     ISOPEN         ; Is it an "open bracket" character i.e. "[" ?
+        
+        CMPA    CLOSE
+        BEQ     ISCLOSE        ; If not, is it a "close bracket" character i.e. "]" ...
+
         BRA     NEXT           ; Any other character is counted as a comment.
 
-DONE    BRA     REPL           ; End of program, so loop around for the next REPL
+DONE    JMP     REPL           ; End of program, so loop around for the next REPL
 
 OUTPUT  LDX     TP             ; Output the character at the current tape pointer
         LDAA    0,X 
@@ -98,10 +115,42 @@ INP     LDX     IP             ; Accept a byte of input from the input string
 STASH   STAA    0,X            ; Common stash routine for the value in the AccA to be stored
         BRA     NEXT           ; wherever X points
 
+ISOPEN  STX     SCRTCHX        ; Store current value of program counter in SCRTCHX
+        LDX     TP             ; Functionality for an open bracket
+        LDAA    0,X            ; Test to see if the value at the tape pointer cell is zero. 
+        BNE     NEXT           ; If it is non-zero, move on to the next instruction
+                               ; If it IS zero, 
+        CLR     BRACKETS       ; Store 1 in "Brackets"
+        INC     BRACKETS  
+
+        LDX     SCRTCHX              ; loop:
+OBLOOP  LDAA    BRACKETS             ; if brackets == 0, jump to nextinstr
+        BEQ     GONEXT
+        INX                             ; increment X
+        LDAA    0,X                     ; Load current program instruction
+        CMPA    OPEN
+        BEQ     ADDBRK                  ; if instruction is "[", increment "BRACKETS" at "ADDBRK"
+        CMPA    CLOSE                                                   
+        BEQ     SUBBRK                  ; if instruction is "]", decrement "BRACKETS" at "SUBBRK"
+
+ADDBRK  INC     BRACKETS                    ;       add 1 to "Brackets"
+        BRA     OBLOOP
+                                        ; 
+SUBBRK  DEC     BRACKETS
+        BRA     OBLOOP
+
+GONEXT  INX
+        STX PC
+        BRA     NEXT
+
+ISCLOSE 
+        BRA     NEXT
+
+
 NEXT    LDX     PC             ; Increment program counter and store it before going back to the next
         INX                    ; instruction
         STX     PC
-        BRA     AROUND         ; Go to the next instruction
+        JMP     AROUND         ; Go to the next instruction
 
 
 

@@ -11,13 +11,13 @@ loop_table = {}
 
 # Pass 1 - construct while:loop table
 loop_stack = []
-for ip, instruction in enumerate(program):
-	if instruction == "[":
-		loop_stack.append(ip)
-	elif instruction == "]":
-		loop_beginning_index = loop_stack.pop()
-		loop_table[loop_beginning_index] = ip
-		loop_table[ip] = loop_beginning_index
+for bk, instruction in enumerate(program): 		# Done
+	if instruction == "[": 						# Done
+		loop_stack.append(bk) 					# Done
+	elif instruction == "]":					# Done
+		loop_beginning_index = loop_stack.pop()	# Done
+		loop_table[loop_beginning_index] = bk
+		loop_table[bk] = loop_beginning_index
     
 # Pass 2 - Interpret the code
 ip = 0
@@ -44,6 +44,7 @@ while ip < len(program):
 		if user_input == []:
 			user_input = list(input() + "\n")
 		tape[cell_index] = ord(user_input.pop(0))
+  
 	elif instruction == "[":
 		if not tape[cell_index]:
 			ip = loop_table[ip]

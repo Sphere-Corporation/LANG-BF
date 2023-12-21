@@ -43,3 +43,23 @@ https://www.youtube.com/watch?v=gjm9irBs96U&t=8722s
 .... so the program can be in one file along with its input and data.
 
 Possibly support standard input where there is no input given
+
+
+# Memory Map 
+
+Base SPHERE-1 has 4K of RAM available mapped out as below:
+
+
+|From*| To* |Size (bytes)        |        Purpose        |
+|-----|-----|--------------------|-----------------------|
+|     |01FF |<center>512<center> |Reserved               |
+|0200 |05FF |<center>1024<center>|Interpreter            |
+|0600 |09FF |<center>1024<center>|Program,Data & Input |
+|0A00 |0DFF |<center>1024<center>|Working Storage        |
+|0E00 |0FFF |<center>512<center> |Stack (Starts at $0FF)+|
+
+<i><b>*</b> Values in Hex</i>
+
+<i><b>+</b> Given a 256-byte program, this should give enough space</i>
+
+Use the debug monitor to enter programs in hex mode, starting at 0600
