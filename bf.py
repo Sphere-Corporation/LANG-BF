@@ -11,11 +11,11 @@ loop_table = {}
 
 # Pass 1 - construct while:loop table
 loop_stack = []
-for bk, instruction in enumerate(program): 		# Done
-	if instruction == "[": 						# Done
-		loop_stack.append(bk) 					# Done
-	elif instruction == "]":					# Done
-		loop_beginning_index = loop_stack.pop()	# Done
+for bk, instruction in enumerate(program): 		
+	if instruction == "[": 						
+		loop_stack.append(bk) 					
+	elif instruction == "]":					
+		loop_beginning_index = loop_stack.pop()	
 		loop_table[loop_beginning_index] = bk
 		loop_table[bk] = loop_beginning_index
     

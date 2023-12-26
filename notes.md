@@ -56,7 +56,7 @@ Base SPHERE-1 has 4K of RAM available mapped out as below:
 |0200 |05FF |<center>1024<center>|Interpreter            |
 |0600 |09FF |<center>1024<center>|Program,Data & Input |
 |0A00 |0DFF |<center>1024<center>|Working Storage        |
-|0E00 |0FFF |<center>512<center> |Stack (Starts at $0FF)+|
+|0E00 |0FFF |<center>512<center> |Stack (Starts at $E00)+|
 
 <i><b>*</b> Values in Hex</i>
 

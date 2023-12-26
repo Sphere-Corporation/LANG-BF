@@ -20,6 +20,9 @@ OPEN    .AS     #$5B	       ; If the byte at the data pointer is zero, then inst
 CLOSE   .AS     #$5D	       ; If the byte at the data pointer is nonzero, then instead of moving the instruction pointer forward to 
                                ;     the next command, jump it back to the command after the matching [ command.
 
+; Memory Locations
+
+STACK   .EQU     $0E00          ; Start of internal stack
 
 ; Strings
 BFMSG   .AZ     /BRAINF**K FOR SPHERE-1/,#$0D  ; Main Banner

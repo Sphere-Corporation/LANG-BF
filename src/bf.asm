@@ -33,15 +33,42 @@ RUNP
         STX     IP
         
 
-
 INTERPT                        ; Entry point of the main interpreter
         
-        LDX     #PROGRAM       ; Load program start address into the X-register
-        
-        
+
 PHASE1  
+        CLR     BK             ; Clear the instruction counter for Phase 1
+        INC     BK             ; Increment it by 1
+        LDX     #STACK         ; Reset the internal stack pointer 
+        STX     LPSTP          ; to the base of the stack
 
+        LDX     #PROGRAM       ; Load program start address into the X-register and store in PC
+        STX     PC
+P1LOOP  LDX     PC 
+        LDAA    0,X            ; Load current program instruction
+        BEQ     PHASE2         ; End of program reached
+        CMPA    OPEN
+        BEQ     OPENB          ; If this is an open bracket, pop the location on to the internal stack
+        ;CMPA    CLOSE          
+        ;BEQ     CLOSEB         ; If this is a close bracket, locate the previous open bracket 
+        BRA     NXTP1
 
+OPENB   LDAA    BK             ; Load the current bracket position into AccA
+        LDX     #LPSTP         ; Get the address of the current internal stack pointer
+        STAA    0,X            ; Store the current open bracket position in the stack
+        INX                    ; Increment the stack pointer
+        STX     LPSTP
+        BRA     NXTP1 
+
+CLOSEB
+
+NXTP1   INC     BK
+
+        LDX     PC             ; Increment program counter and store it before going back to the next
+        INX                    ; instruction
+        STX     PC
+
+        BRA     P1LOOP
 
 PHASE2                         ; Phase 2 of the interpreter - start running the instructions
 
@@ -115,37 +142,10 @@ INP     LDX     IP             ; Accept a byte of input from the input string
 STASH   STAA    0,X            ; Common stash routine for the value in the AccA to be stored
         BRA     NEXT           ; wherever X points
 
-ISOPEN  STX     SCRTCHX        ; Store current value of program counter in SCRTCHX
-        LDX     TP             ; Functionality for an open bracket
-        LDAA    0,X            ; Test to see if the value at the tape pointer cell is zero. 
-        BNE     NEXT           ; If it is non-zero, move on to the next instruction
-                               ; If it IS zero, 
-        CLR     BRACKETS       ; Store 1 in "Brackets"
-        INC     BRACKETS  
 
-        LDX     SCRTCHX              ; loop:
-OBLOOP  LDAA    BRACKETS             ; if brackets == 0, jump to nextinstr
-        BEQ     GONEXT
-        INX                             ; increment X
-        LDAA    0,X                     ; Load current program instruction
-        CMPA    OPEN
-        BEQ     ADDBRK                  ; if instruction is "[", increment "BRACKETS" at "ADDBRK"
-        CMPA    CLOSE                                                   
-        BEQ     SUBBRK                  ; if instruction is "]", decrement "BRACKETS" at "SUBBRK"
+ISOPEN  
 
-ADDBRK  INC     BRACKETS                    ;       add 1 to "Brackets"
-        BRA     OBLOOP
-                                        ; 
-SUBBRK  DEC     BRACKETS
-        BRA     OBLOOP
-
-GONEXT  INX
-        STX PC
-        BRA     NEXT
-
-ISCLOSE 
-        BRA     NEXT
-
+ISCLOSE
 
 NEXT    LDX     PC             ; Increment program counter and store it before going back to the next
         INX                    ; instruction
