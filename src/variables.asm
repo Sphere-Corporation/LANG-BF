@@ -9,6 +9,7 @@ IP       .DA     1             ; Input pointer
 
 LPSTP    .DA     2             ; Loop Stack Pointer
 BK       .DA     1             ; Pointer in program in phase 1
+LBI      .DA     2             ; Start of the loop indicated by the close bracket
 
 ;PROGRAM  .AZ     />++++++++[-<+++++++++>]<.>>+>-[+]++>++>+++[>[->+++<<+++>]<<]>-----.>->+++..+++.>-.<<+[>[+>+]>>]<--------------.>>.+++.------.--------.>+.>+./
 PROGRAM  .AZ     /[[[.>.]]]/ 

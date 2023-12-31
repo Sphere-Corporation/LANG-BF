@@ -12,6 +12,8 @@
 ;         Contains controller for the complete BrainF**k interpreter
 ;         all other subroutines are called (in)directly from this.
 
+; OPTIMISE BY USING DEC LPSTR etc TO DECREMENT OR INCREMENT VALUES IN 16-BIT ADDRESSES
+
 START   LDS     #$1FF          ; Stack below program
                                ; MUST be first line of code
 
@@ -49,26 +51,57 @@ P1LOOP  LDX     PC
         BEQ     PHASE2         ; End of program reached
         CMPA    OPEN
         BEQ     OPENB          ; If this is an open bracket, pop the location on to the internal stack
-        ;CMPA    CLOSE          
-        ;BEQ     CLOSEB         ; If this is a close bracket, locate the previous open bracket 
+        CMPA    CLOSE          
+        BEQ     CLOSEB         ; If this is a close bracket, locate the previous open bracket 
         BRA     NXTP1
 
 OPENB   LDAA    BK             ; Load the current bracket position into AccA
-        LDX     #LPSTP         ; Get the address of the current internal stack pointer
+        LDX     LPSTP          ; Get the address of the current internal stack pointer
         STAA    0,X            ; Store the current open bracket position in the stack
         INX                    ; Increment the stack pointer
         STX     LPSTP
         BRA     NXTP1 
 
-CLOSEB
+                               ; CLOSE BRACKET STUFF
+CLOSEB  LDX     LPSTP          ; MANAGEMENT OF THE LPSTP STACK IS FINE.....
+        DEX
+        LDAB    0,X             
+        STX     LPSTP          ;
+        STAB    LBI            ; loop_beginning_index is now stored
+
+                               ; loop_table[loop_beginning_index] = bk
+                               ; GOOD TO HERE.....
+        LDAA    #LBI
+        LDAB    #BK
+        LDX     LOOPTBL
+LOOPA   INX
+        DECA
+        BNE     LOOPA
+        STAB    0,X 
+        
+        
+        LDAA    #BK
+        LDAB    #LBI
+        LDX     LOOPTBL
+LOOPB   INX
+        DECA
+        BNE     LOOPB
+        STAB    0,X 
+        
+                              ; loop_table[bk] = loop_beginning_index
 
 NXTP1   INC     BK
-
         LDX     PC             ; Increment program counter and store it before going back to the next
         INX                    ; instruction
         STX     PC
 
         BRA     P1LOOP
+
+
+; contents:
+
+; STACK         E00   4       010203??
+; LOOPTBL       F00   4       030201??
 
 PHASE2                         ; Phase 2 of the interpreter - start running the instructions
 

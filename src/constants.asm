@@ -22,7 +22,8 @@ CLOSE   .AS     #$5D	       ; If the byte at the data pointer is nonzero, then i
 
 ; Memory Locations
 
-STACK   .EQU     $0E00          ; Start of internal stack
+STACK   .EQU     $0E00         ; Start of internal stack
+LOOPTBL .EQU     $0F00         ; Loop table
 
 ; Strings
 BFMSG   .AZ     /BRAINF**K FOR SPHERE-1/,#$0D  ; Main Banner
