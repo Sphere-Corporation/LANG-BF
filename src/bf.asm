@@ -44,6 +44,8 @@ PHASE1
         LDX     #STACK         ; Reset the internal stack pointer 
         STX     LPSTP          ; to the base of the stack
 
+
+
         LDX     #PROGRAM       ; Load program start address into the X-register and store in PC
         STX     PC
 P1LOOP  LDX     PC 
@@ -70,27 +72,28 @@ CLOSEB  LDX     LPSTP          ; MANAGEMENT OF THE LPSTP STACK IS FINE.....
         STAB    LBI            ; loop_beginning_index is now stored
 
                                
-                               ; GOOD TO HERE.....
+                               ; DEFINATELY GOOD TO HERE.....
         
                                ; Remember, AccB contains LBI
                                ; loop_table[loop_beginning_index] = bk
-        LDAA    #BK
-        LDX     LOOPTBL
+CLB2    LDAA    BK             ; seems good till here
+        LDX     #LOOPTBL       ; Reset the loop table value
+        
 LOOPA   INX
         DECB
         BNE     LOOPA
         STAA    0,X 
         
-        
-        LDAA    #BK
-        LDAB    #LBI
-        LDX     LOOPTBL
+        ; loop_table[bk] = loop_beginning_index
+        LDAA    BK
+        LDAB    LBI
+        LDX     #LOOPTBL
 LOOPB   INX
         DECA
         BNE     LOOPB
         STAB    0,X 
-        
-                              ; loop_table[bk] = loop_beginning_index
+                               ; I THINK WE ARE GOOD TO HERE..... :-)
+                              
 
 NXTP1   INC     BK
         LDX     PC             ; Increment program counter and store it before going back to the next
@@ -178,7 +181,14 @@ STASH   STAA    0,X            ; Common stash routine for the value in the AccA 
         BRA     NEXT           ; wherever X points
 
 
-ISOPEN  
+ISOPEN                         ; NOT DEBUGGED YET - COMMENTED OUT FOR NOW.
+                               ; If the byte at the data pointer is zero, then instead of moving the instruction 
+                               ;     pointer forward to the next command, jump it forward to the command after the matching ] command.
+        ;LDX     TP             ; Get the character at the current tape pointer
+        ;LDAA    0,X 
+        ;BEQ     OBINCIP
+        ;BRA  NEXT
+        ; Move the instruction pointer to the command after the corresponding close bracket
 
 ISCLOSE
 
@@ -186,10 +196,6 @@ NEXT    LDX     PC             ; Increment program counter and store it before g
         INX                    ; instruction
         STX     PC
         JMP     AROUND         ; Go to the next instruction
-
-
-
-
 
 ; Subroutines
         .IN library            ; Include library routines

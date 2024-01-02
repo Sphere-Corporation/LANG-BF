@@ -1,7 +1,7 @@
 ; Program Variables
 ;SCRTCHA  .DA     1             ; Space for AccA
 ;SCRTCHB  .DA     1             ; Space for AccB
-SCRTCHX  .DA     2             ; Space for X register
+;SCRTCHX  .DA     2             ; Space for X register
 
 PC       .DA     1             ; Program counter
 TP       .DA     1             ; Tape pointer
