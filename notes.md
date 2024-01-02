@@ -63,3 +63,11 @@ Base SPHERE-1 has 4K of RAM available mapped out as below:
 <i><b>+</b> Given a 256-byte program, this should give enough space</i>
 
 Use the debug monitor to enter programs in hex mode, starting at 0600
+
+```mermaid
+graph TD;
+    A-->B;
+    A-->C;
+    B-->D;
+    C-->D;
+```
