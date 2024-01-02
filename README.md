@@ -28,3 +28,11 @@ Only printable-characters will be output correctly.
 
 The set of characters that the SPHERE-1 recognises is shown [here](doc/ascii.png) (taken directly from Appendix B of the Sphere-1 Operator's Manual). Note that there are many unprintable characters also shown in this list, and that it is 7-bit ASCII i.e. no characters with a value of greater than 127 are available.
 It is also worth noting that without a modification, only upper case characters are printable with the base SPHERE-1 implementation.
+
+### Program Size
+Due to several limits imposed by the interpreter and the computer itself,
+ - limited memory
+ - a maximum of 127 '`[`' and '`]`' pairs can be used (note that this number leaves no scope for any other instructions)
+
+ the program size is limited to ***255*** instructions.
+

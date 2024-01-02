@@ -69,15 +69,17 @@ CLOSEB  LDX     LPSTP          ; MANAGEMENT OF THE LPSTP STACK IS FINE.....
         STX     LPSTP          ;
         STAB    LBI            ; loop_beginning_index is now stored
 
-                               ; loop_table[loop_beginning_index] = bk
+                               
                                ; GOOD TO HERE.....
-        LDAA    #LBI
-        LDAB    #BK
+        
+                               ; Remember, AccB contains LBI
+                               ; loop_table[loop_beginning_index] = bk
+        LDAA    #BK
         LDX     LOOPTBL
 LOOPA   INX
-        DECA
+        DECB
         BNE     LOOPA
-        STAB    0,X 
+        STAA    0,X 
         
         
         LDAA    #BK
