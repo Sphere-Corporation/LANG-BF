@@ -1,4 +1,4 @@
-# Suggestion from @BenZotto - use editor as the means to enter BF programs
+#### Suggestion from @BenZotto - use editor as the means to enter BF programs
 
 
 - Use CTRL-E to enter the editor from the executive
@@ -23,9 +23,24 @@
     - ESC       Exit the editor
     
 
-# Hello World! program
+#### Hello World! program
 
+```
 >++++++++[-<+++++++++>]<.>>+>-[+]++>++>+++[>[->+++<<+++>]<<]>-----.>->+++..+++.>-.<<+[>[+>+]>>]<--------------.>>.+++.------.--------.>+.>+.
+```
+
+#### Language characters
+
+|Character| Function              |
+|---------|-----------------------|
+| **+**   |  Increment the byte at the data pointer by one. |
+| **,**   |  Accept one byte of input, storing its value in the byte at the data pointer. |
+| **-**   |  Decrement the byte at the data pointer by one. |
+| **.**   |  Output the byte at the data pointer. |
+| **<**   |  Decrement the data pointer by one (to point to the next cell to the left). |
+| **>**   | Increment the data pointer by one (to point to the next cell to the right). |
+| **[**   |  If the byte at the data pointer is zero, then instead of moving the instruction pointer forward to the next command, jump it forward to the command after the matching ] command. |
+| **]**	  |  If the byte at the data pointer is nonzero, then instead of moving the instruction pointer forward to the next command, jump it back to the command after the matching [ command. |
 
 
 # BF Specification (as canonical as I can find)
@@ -54,7 +69,7 @@ Base SPHERE-1 has 4K of RAM available mapped out as below:
 |-----|-----|--------------------|-----------------------|
 |     |01FF |<center>512<center> |Reserved               |
 |0200 |05FF |<center>1024<center>|Interpreter            |
-|0600 |09FF |<center>1024<center>|Program,Data & Input |
+|0600 |09FF |<center>1024<center>|Program,Data & Input   |
 |0A00 |0DFF |<center>1024<center>|Working Storage        |
 |0E00 |0FFF |<center>512<center> |Stack (Starts at $E00)+|
 
@@ -63,6 +78,9 @@ Base SPHERE-1 has 4K of RAM available mapped out as below:
 <i><b>+</b> Given a 256-byte program, this should give enough space</i>
 
 Use the debug monitor to enter programs in hex mode, starting at 0600
+
+
+### Program Structure
 
 ```mermaid
  flowchart TD
