@@ -86,7 +86,7 @@ Use the debug monitor to enter programs in hex mode, starting at 0600
 ### Program Structure
 
     ```mermaid
-    flowchart TD
+    flowchart TD;
         MAIN(bf.asm) --> B(constants.asm);
         MAIN --> C(firmware.asm);
         MAIN --> D(library.asm);
