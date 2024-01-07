@@ -9,9 +9,9 @@
 # Requires Python 3.9 or newer
 #
 # 0.0.1     28-NOV-2023     GAME-TT     Initial release
-# 0.0.2     04-DEC-2023     LANG-BF     Improved assembly error processing          
+# 0.0.2     04-JAN-2024     LANG-BF     Improved assembly error processing          
 #                                       Added versionJustify and NLAfterBuildVersion settings
-
+#                                       Consolidated literals and abstracted code from main cli() function
 
 # Import system libraries
 import os
@@ -23,10 +23,17 @@ import toml
 # Import 3rd party library
 import click
 
+# Define constants
+CR = '\n'
+ERRORCOLOR = "red"
+INFOCOLOR = "blue"
+CHANGECOLOR = "yellow"
+
 # Define software characteristics
 _version = '0.0.2';
 _package_name = 'build';
-_message = '%(package)s (Version %(version)s): Sphere-1 Builder';
+_copyright = '(c) 2023/24 Andrew Shapton, Portions (c) 2023 Ben Zotto'
+_message = '%(package)s (Version %(version)s): Sphere-1 Builder' + CR + _copyright;
 
 # Define messages
 CONFIG_FILE_DOES_NOT_EXIST  = "Configuration file {0} does not exist"
@@ -34,23 +41,39 @@ KEY_DOES_NOT_EXIST          = "Configuration Key: {0} does not exist."
 SECTION_DOES_NOT_EXIST      = "Configuration Section: {0} does not exist within {1}."
 
 
-def CamelCase(s):
- 
-  newString = ''
-  newString += s[0].upper()
+def open_configuration_file(CFILE, NOT_EXIST):
+    ''' Check supply of a configuration file '''
+    try:
+        with open(CFILE, 'r') as f:
+            config = toml.load(f)
+    except FileNotFoundError:            
+        error_message = NOT_EXIST.format(CFILE)
+        click.secho(error_message, fg=ERRORCOLOR)
+        exit()
+    return config
 
-  for k in range(1, len(s)): 
-    if s[k] == ' ':
-      newString += s[k + 1].upper()
-      k += 1
-    elif s[k - 1] != ' ':
-      newString += s[k]
-  return newString
+def CamelCase(s):
+    ''' Convert a string to camel case '''
+    newString = ''
+    newString += s[0].upper()
+
+    for k in range(1, len(s)): 
+        if s[k] == ' ':
+            newString += s[k + 1].upper()
+            k += 1
+        elif s[k - 1] != ' ':
+            newString += s[k]
+    return newString
 
 def date_2_julian_string (date):
+    ''' Return a date in a Julian-date format '''
     return str(date.strftime('%Y')) + date.strftime('%j')
 
-
+def determine_build_number(build):    
+    ''' Determine the build number of this build '''
+    if build == "NONE":
+        return date_2_julian_string(datetime.now()) + "-" + datetime.now().strftime('%H:%M');
+    
 def get_key(config_info, key, default):
     if key in config_info:
         _key   = config_info[key]
@@ -58,47 +81,106 @@ def get_key(config_info, key, default):
         _key   = default
     return _key
 
-
 def default_key(config_info, key, default, required, section, filename):
     ''' Check to see if a key exists, and return an error if the key doesn't exist or has a null value, but only if the key is optional, return the value/default otherwise'''
     key_value = get_key(config_info, key, default)
     if (key_value) == default:
+        kv = key_value
         if required:            
             error_message = KEY_DOES_NOT_EXIST.format(key,section,filename)
-            click.secho(error_message, fg="red")
+            click.secho(error_message, fg=ERRORCOLOR)
             exit() 
         else:
-            return key_value
+            return kv
     return key_value
 
 
 def validate_section(config_info, section, silent, spaces, filename):
     output = ' ' * spaces + section
     if not(silent):
-        click.secho(output, fg="blue") 
+        click.secho(output, fg=INFOCOLOR) 
     if _ := config_info.get(section):
         pass
     else:
         error_message = SECTION_DOES_NOT_EXIST.format(section,filename)
-        click.secho(error_message, fg="red")
+        click.secho(error_message, fg=ERRORCOLOR)
         exit()
 
 def construct_build_line(build, buildJustify, NLAfterBuildVersion):
-    version_literal="VERSION:" + build
+    version_literal = "VERSION:" + build
+    build_literal = "BUILD   .AZ  /" 
     if buildJustify == "C":
         spc = (round((32-(len(version_literal)))/2))
-        fullline = "BUILD   .AZ  /" + ''.join([char*spc for char in ' ']) + version_literal + '/'
+        fullline = build_literal + ''.join([char*spc for char in ' ']) + version_literal + '/'
 
     if buildJustify == "L":
-        fullline = "BUILD   .AZ  /" + version_literal + '/'
+        fullline = build_literal + version_literal + '/'
     
     if buildJustify == "R":
         spc = (round(32-(len(version_literal))))
-        fullline = "BUILD   .AZ  /" + ''.join([char*spc for char in ' ']) + version_literal + '/'
+        fullline = build_literal + ''.join([char*spc for char in ' ']) + version_literal + '/'
         
     if NLAfterBuildVersion == "True":
         fullline = fullline + ",#$0D"
     return fullline
+
+def build_version_file(silent, build, buildJustify, NLAfterBuildVersion, srcDir, buildASM):
+    ''' Auto-construct the build version file '''
+    if not(silent):
+        click.secho(CR + 'Building Version: ' + build + CR, fg=INFOCOLOR)
+
+    if not(silent):
+        fullline = construct_build_line(build, buildJustify, NLAfterBuildVersion)
+        buildASMFile = srcDir + buildASM
+        click.secho('Auto-generating build version file.' + CR, fg=INFOCOLOR)
+
+    # Auto-generate build version file for inclusion in the splash screen
+    with open(buildASMFile,'w') as f:
+        f.write('; AUTO-GENERATED: DO NOT MODIFY OR REMOVE' + CR)
+        f.write(fullline)
+        
+def assemble_source_code(silent, srcDir, assemblerDir, assembler, sourceFile):
+    if not(silent):
+        click.secho('Assembling source code.', fg=INFOCOLOR)
+    
+    # Attempt to change directory to the source file directory
+    
+    try:
+        os.chdir(srcDir)
+    except FileNotFoundError:
+        error_message = "Directory: {0} does not exist".format(srcDir)
+        click.secho(error_message, fg=ERRORCOLOR)
+        exit()
+    except NotADirectoryError:
+        error_message = "{0} is not a directory".format(srcDir)
+        click.secho(error_message, fg=ERRORCOLOR)
+        exit()        
+    except PermissionError:
+        error_message = "You do not have permissions to change to {0}".format(srcDir)
+        click.secho(error_message, fg=ERRORCOLOR)
+        exit()
+
+    command = assemblerDir + assembler + ' ' + sourceFile
+    
+    # Open a subprocess to run the command
+    p = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True);
+
+    # Establish a connection to the process
+    (output, err) = p.communicate()
+    if not(silent) and output:
+        click.secho(output.decode('ascii'), fg=INFOCOLOR)
+    if err:
+        click.secho(err.decode('ascii'), fg=ERRORCOLOR)        
+
+    # Wait until the process has completed
+    _ = p.wait();
+
+    # Improving output 
+    # Build will cease if there are warnings and/or errors
+    for line in output.decode('ascii').splitlines():  
+        if ("Error" in line or "Warning" in line) and line[:1] > '0':
+                click.secho("Assembly failed - Warnings and/or Errors.", fg=ERRORCOLOR)        
+                exit()
 
 @click.command()
 @click.option("--config","-c", help="Configuration file",required=False,default="config.toml")
@@ -107,49 +189,38 @@ def construct_build_line(build, buildJustify, NLAfterBuildVersion):
 @click.version_option(version=_version, package_name=_package_name, message=_message)
 def cli(config, build, silent):
     
-    # Determine build number
-    if build == "NONE":
-        build = date_2_julian_string(datetime.now()) + "-" + datetime.now().strftime('%H:%M');
-    message = '\n' + _package_name + '(Version ' + _version + ') - (c) 2023 Andrew Shapton, Portions (c) 2023 Ben Zotto\n'
+    ''' Display main banner '''
+    message = CR + _package_name + '(Version ' + _version + ') - ' + _copyright + CR
     if not(silent):
         click.secho(message,fg="bright_blue")
+    
+    ''' Determine build number '''
+    build = determine_build_number(build)
         
+    ''' Check supply of main configuration file '''
     MAIN_CONFIG_FILE = config
-    # Check supply of main configuration file
-    try:
-        with open(MAIN_CONFIG_FILE, 'r') as f:
-            config = toml.load(f)
-    except FileNotFoundError:            
-        error_message = CONFIG_FILE_DOES_NOT_EXIST.format(MAIN_CONFIG_FILE)
-        click.secho(error_message, fg="red")
-        exit()
+    config = open_configuration_file(MAIN_CONFIG_FILE, CONFIG_FILE_DOES_NOT_EXIST);
     
     # Read config file 
     if not(silent):
-        click.secho('Acquiring main configuration from ',nl=False, fg="blue")
-        click.secho(MAIN_CONFIG_FILE,nl=False, fg='yellow')
-        click.secho('.\n\nValidating Main Configuration:', nl=False , fg="blue")
+        click.secho('Acquiring Main configuration from ',nl=False, fg=INFOCOLOR)
+        click.secho(MAIN_CONFIG_FILE,nl=False, fg=CHANGECOLOR)
+        click.secho('.' + CR + CR + 'Validating Main Configuration:', nl=False , fg=INFOCOLOR)
         
     # Validate the existence of the Config section    
-    validate_section(config,"Config", silent,1,MAIN_CONFIG_FILE)
+    validate_section(config,"Config", silent, 1, MAIN_CONFIG_FILE)
     
     MASTER_CONFIG_FILE  = default_key(config["Config"], "build", "", True,'Config',MAIN_CONFIG_FILE) # Both these keys have been checked and found to exist
     THIS_CONFIG_FILE    = default_key(config["Config"], "this", "", True,'Config',MAIN_CONFIG_FILE)  # so no defaults are required.
 
-    # Check supply of build setup configuration file
-    try:
-        with open(MASTER_CONFIG_FILE, 'r') as f:
-            bsconfig = toml.load(f)
-    except FileNotFoundError:            
-        error_message = CONFIG_FILE_DOES_NOT_EXIST.format(MASTER_CONFIG_FILE)
-        click.secho(error_message, fg="red")
-        exit()
-    
+    # Check supply of main configuration file
+    bsconfig = open_configuration_file(MASTER_CONFIG_FILE, CONFIG_FILE_DOES_NOT_EXIST);
+        
     # Read build config file 
     if not(silent):
-        click.secho('\nAcquiring Build Setup configuration from ',nl=False, fg="blue")
-        click.secho(MASTER_CONFIG_FILE,nl=False, fg='yellow')
-        click.secho('.\n\nValidating Build Setup configuration:', nl=False , fg="blue")
+        click.secho(CR + 'Acquiring Build Setup configuration from ',nl=False, fg=INFOCOLOR)
+        click.secho(MASTER_CONFIG_FILE,nl=False, fg=CHANGECOLOR)
+        click.secho('.' + CR + CR + 'Validating Build Setup configuration:', nl=False , fg=INFOCOLOR)
         
     # Validating AssembledConfig
     validate_section(bsconfig,"AssemblerConfig", silent, 1, MASTER_CONFIG_FILE)
@@ -165,14 +236,17 @@ def cli(config, build, silent):
             config = toml.load(f)
     except FileNotFoundError:            
         error_message = CONFIG_FILE_DOES_NOT_EXIST.format(THIS_CONFIG_FILE)
-        click.secho(error_message, fg="red")
+        click.secho(error_message, fg=ERRORCOLOR)
         exit()
-
+        
+    # Check supply of the specific build configuration file
+    config = open_configuration_file(THIS_CONFIG_FILE, CONFIG_FILE_DOES_NOT_EXIST);
+ 
     # Read build config file 
     if not(silent):
-        click.secho('\nAcquiring Build configuration from ', nl=False, fg="blue")
-        click.secho(THIS_CONFIG_FILE,nl=False, fg='yellow')
-        click.secho('.\n\nValidating Build configuration:', nl=False , fg="blue")
+        click.secho(CR + 'Acquiring Build configuration from ', nl=False, fg=INFOCOLOR)
+        click.secho(THIS_CONFIG_FILE,nl=False, fg=CHANGECOLOR)
+        click.secho('.' + CR + CR + 'Validating Build configuration:', nl=False , fg=INFOCOLOR)
 
     validate_section(config,"Locations", silent,1, THIS_CONFIG_FILE)
     validate_section(config,"BuildParameters", silent,32, THIS_CONFIG_FILE)
@@ -197,64 +271,15 @@ def cli(config, build, silent):
     buildJustify        = default_key(config["Miscellaneous"],"buildJustify", "", False,"Miscellaneous", THIS_CONFIG_FILE)
     NLAfterBuildVersion = default_key(config["Miscellaneous"],"NLAfterBuildVersion", True, False,"Miscellaneous", THIS_CONFIG_FILE)
     
+    ''' Ensure that the NLAfterBuildVersion is the correct format for usage '''
     NLAfterBuildVersion = CamelCase(str(NLAfterBuildVersion))
     
-    if not(silent):
-        click.secho('Building Version: ' + build + '\n', fg="blue")
-
-    if not(silent):
-        fullline = construct_build_line(build, buildJustify, NLAfterBuildVersion)
-        buildASMFile = srcDir + buildASM
-        click.secho('Auto-generating build version file.\n', fg="blue")
-
-    # Auto-generate build version file for inclusion in the splash screen
-    with open(buildASMFile,'w') as f:
-        f.write('; AUTO-GENERATED: DO NOT MODIFY OR REMOVE\n')
-        f.write(fullline)
+    ''' Construct the version file for inclusion in the build '''
+    build_version_file(silent, build, buildJustify, NLAfterBuildVersion, srcDir, buildASM)
+        
+    ''' Assemble the source code '''
+    assemble_source_code(silent, srcDir, assemblerDir, assembler, sourceFile  )
     
-    if not(silent):
-        click.secho('Assembling source code.', fg="blue")
-    
-    # Attempt to change directory to the source file directory
-    
-    try:
-        os.chdir(srcDir)
-    except FileNotFoundError:
-        error_message = "Directory: {0} does not exist".format(srcDir)
-        click.secho(error_message, fg="red")
-        exit()
-    except NotADirectoryError:
-        error_message = "{0} is not a directory".format(srcDir)
-        click.secho(error_message, fg="red")
-        exit()        
-    except PermissionError:
-        error_message = "You do not have permissions to change to {0}".format(srcDir)
-        click.secho(error_message, fg="red")
-        exit()
-
-    command = assemblerDir + assembler + ' ' + sourceFile
-    
-    # Open a subprocess to run the command
-    p = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True);
-
-    # Establish a connection to the process
-    (output, err) = p.communicate()
-    if not(silent):
-        if output:
-            click.secho(output.decode('ascii'), fg="blue")
-    if err:
-        click.secho(err.decode('ascii'), fg="red")        
-
-    # Wait until the process has completed
-    _ = p.wait();
-
-    # Improving output 
-    # Build will cease if there are warnings and/or errors
-    for line in output.decode('ascii').splitlines():  
-        if ("Error" in line or "Warning" in line) and line[:1] > '0':
-                click.secho("Assembly failed - Warnings and/or Errors.", fg="red")        
-                exit()
-
     # Create the flags from the config file
     fl = ""
     for flag in flags:
@@ -272,10 +297,9 @@ def cli(config, build, silent):
     if cassette != '':
         cassette_cmd = " --cassette " + cassette
                 
-           
     command = convertEXEDir + 'convertEXE --input ' + assembledFile +  ' --prefix ' + prefix + ' --base ' + base + ' --title ' + title + js_cmd + cassette_cmd + vcass_cmd + ' --out ' + outputDir + ' --in ' + srcDir + ' ' + fl
     if not(silent):
-        click.secho('Converting to other formats.\n', fg="blue")
+        click.secho('Converting to other formats.' + CR, fg=INFOCOLOR)
 
     # Open a subprocess to run the command
     p = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True);
@@ -288,22 +312,20 @@ def cli(config, build, silent):
             
     # If there is a successful return code, continue to clean up.
     if (p.returncode == 0):
-        if output:
-            if not(silent):
-                click.secho(output.decode('ascii'), fg="blue")
-        if err:
-            if not(silent):
-                click.secho(err.decode('ascii'), fg="red")
-                exit()
+        if output and not(silent):
+            click.secho(output.decode('ascii'), fg=INFOCOLOR)
+        if err and not(silent):
+            click.secho(err.decode('ascii'), fg=ERRORCOLOR)
+            exit()
         # Remove the build.asm file here
         if not(silent):
-            click.secho('Cleaning up after building.\n', fg="blue")
+            click.secho('Cleaning up after building.' + CR, fg=INFOCOLOR)
         try:
             os.remove(buildASM)
-        except OSError as e:
+        except OSError:
             # If it fails, inform the user.
             error_message = "Could not delete {0}; file does not exist".format(buildASM)
-            click.secho(error_message, fg="red")
+            click.secho(error_message, fg=ERRORCOLOR)
             exit()
             
 # Build entry point
