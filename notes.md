@@ -85,13 +85,13 @@ Use the debug monitor to enter programs in hex mode, starting at 0600
 
 ### Program Structure
 
-    ```mermaid
-    flowchart TD;
-        MAIN(bf.asm) --> B(constants.asm);
-        MAIN --> C(firmware.asm);
-        MAIN --> D(library.asm);
-        MAIN --> E(phase1.asm);
-        MAIN --> F(variables.asm);
-        MAIN --> G[build.asm];
-    style G fill:#fff,stroke:#f66,stroke-width:2px,color:#000,stroke-dasharray: 5 5;
-    ```
+```mermaid
+flowchart TD;
+    MAIN(bf.asm) --> B(constants.asm);
+    MAIN --> C(firmware.asm);
+    MAIN --> D(library.asm);
+    MAIN --> E(phase1.asm);
+    MAIN --> F(variables.asm);
+    MAIN --> G[build.asm];
+style G fill:#fff,stroke:#f66,stroke-width:2px,color:#000,stroke-dasharray: 5 5;
+```
