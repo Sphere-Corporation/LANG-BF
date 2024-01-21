@@ -1,3 +1,7 @@
+; Phase 1 :
+;         Create the loop index tables for later processing by the [ and ] instructions
+
+
 PHASE1  
         CLR     BK             ; Clear the instruction counter for Phase 1
         INC     BK             ; Increment it by 1
@@ -32,7 +36,7 @@ CLOSEB  LDX     LPSTP          ; MANAGEMENT OF THE LPSTP STACK IS FINE.....
         STAB    LBI            ; loop_beginning_index is now stored
 
                                
-                               ; DEFINATELY GOOD TO HERE.....
+                               ; DEFINITELY GOOD TO HERE.....
         
                                ; Remember, AccB contains LBI
                                ; loop_table[loop_beginning_index] = bk
