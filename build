@@ -38,7 +38,7 @@ CHANGECOLOR = "yellow"
 SUCCESSCOLOR = "green"
 
 # Define software characteristics
-_version = '0.0.2';
+_version = '0.0.3';
 _package_name = 'build';
 _copyright = '(c) 2023/2024 Andrew Shapton, Portions (c) 2023 Ben Zotto'
 _message = '%(package)s (Version %(version)s): Sphere-1 Builder' + CR + _copyright;
