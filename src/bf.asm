@@ -29,6 +29,16 @@ REPL    LDX     #PROMPT
 
 RUNP
         LDX     #TAPE          ; Store initial tape pointer address in TP
+CLRTP   STX     TP
+
+; Need to reset tape storage to 256 zeros
+        CLR     0,X
+        INX
+        CPX     #EOTAPE        ; Cycle until the end of the 256 bytes of tape
+        BNE     CLRTP
+        
+        
+        LDX     #TAPE          ; Re-store initial tape pointer address in TP
         STX     TP
 
         LDX     #INPUT         ; Store initial input pointer address in IP
@@ -113,12 +123,12 @@ STASH   STAA    0,X            ; Common stash routine for the value in the AccA 
         BRA     NEXT           ; wherever X points
 
 
-ISOPEN                         ; NOT DEBUGGED YET - COMMENTED OUT FOR NOW.
+ISOPEN                         
                                ; If the byte at the data pointer is zero, then instead of moving the instruction 
                                ;     pointer forward to the next command, jump it forward to the command after the matching ] command.
         LDX     TP             ; Get the character at the current tape pointer
         LDAA    0,X 
-        CMPA    #65
+        CMPA    #0
         BEQ     OBINCIP
         BRA     NEXT
         ; Move the instruction pointer to the command after the corresponding close bracket
@@ -136,11 +146,11 @@ OBLP    INX
 
 ISCLOSE                         ; If the byte at the data pointer is nonzero, then instead of moving the instruction pointer forward to 
                                 ;     the next command, jump it back to the command after the matching [ command.
-        LDX     TP             ; Get the character at the current tape pointer
+        LDX     TP              ; Get the character at the current tape pointer
         LDAA    0,X 
-        CMPA    #65
-        BEQ     CBINCIP
-        BRA  NEXT
+        CMPA    #0
+        BNE     CBINCIP
+        BRA     NEXT
         ; Move the instruction pointer to the command after the corresponding open bracket
 CBINCIP
                                 ; This bit finds the corresponding open bracket

@@ -24,7 +24,8 @@ CLOSE   .AS     #$5D	       ; If the byte at the data pointer is nonzero, then i
 
 STACK   .EQU     $0E00         ; Start of internal stack
 LOOPTBL .EQU     $0EFF         ; Loop table (one less than the value required)
-
+TAPE    .EQU     $09FF         ; Start address of tape storage
+EOTAPE  .EQU     $0AFE         ; End address of tape storage
 ; Strings
 BFMSG   .AZ     /BRAINF**K FOR SPHERE-1/,#$0D  ; Main Banner
 PROMPT  .AZ     #$0D,/$ /                      ; Prompt

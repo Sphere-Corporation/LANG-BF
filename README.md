@@ -36,3 +36,13 @@ Due to several limits imposed by the interpreter and the computer itself,
 
  the program size is limited to ***255*** instructions.
 
+### Tape Storage Size
+Due to limited memory on the base Sphere-1 computer, the tape size is limited to ***255*** locations.
+
+## Error Messages
+This implementation of BrainF**k is capable of displaying error messages when specific conditions are reached or breached:
+TODO:
+|Error Code |Meaning| Notes |
+|-----------|-------|-------|
+| E001      |Program length exceeds 255 instructions| This will cause execution to cease when the 255th instruction has been reached and executed|
+| E001      |Tape storage length exceeds length > 255 instructions||

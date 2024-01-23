@@ -9,6 +9,6 @@ BK       .DA     1             ; Pointer in program in phase 1
 LBI      .DA     2             ; Start of the loop indicated by the close bracket
 
 ;PROGRAM  .AZ     />++++++++[-<+++++++++>]<.>>+>-[+]++>++>+++[>[->+++<<+++>]<<]>-----.>->+++..+++.>-.<<+[>[+>+]>>]<--------------.>>.+++.------.--------.>+.>+./
-PROGRAM  .AZ     />[.>]/ 
-TAPE     .AZ     /ABCDEFG/
+PROGRAM  .AZ     />+++++++++++++++++++++++++++++++++.>++[.-]/
 INPUT    .AZ     /123/
+
