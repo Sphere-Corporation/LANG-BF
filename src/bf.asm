@@ -29,7 +29,7 @@ REPL    LDX     #PROMPT
 
 RUNP
         LDX     #TAPE          ; Store initial tape pointer address in TP
-CLRTP   STX     TP
+CLRTP   ;STX     TP
 
 ; Need to reset tape storage to 256 zeros
         CLR     0,X
@@ -51,7 +51,7 @@ INTERPT                        ; Entry point of the main interpreter
  
 
 PHASE2                         ; Phase 2 of the interpreter - start running the instructions
-
+        CLR     INS            ; Clear the instruction counter
         LDX     #PROGRAM       ; Load program start address into the X-register and store in PC
         STX     PC
 
@@ -83,7 +83,7 @@ AROUND  LDX     PC
         CMPA    CLOSE
         BEQ     ISCLOSE        ; If not, is it a "close bracket" character i.e. "]" ...
 
-        BRA     NEXT           ; Any other character is counted as a comment.
+        JMP     NEXT           ; Any other character is counted as a comment.
 
 DONE    JMP     REPL           ; End of program, so loop around for the next REPL
 
@@ -107,7 +107,7 @@ INCTP   LDX     TP             ; Increment the current tape pointer
         STX     TP
         BRA     NEXT
 
-DECTP   LDX     TP             ; Increment the current tape pointer
+DECTP   LDX     TP             ; Decrement the current tape pointer
         DEX
         STX     TP
         BRA     NEXT
@@ -136,7 +136,7 @@ OBINCIP                         ***** I THINK THIS IS THE ISSUE - PC SHOULD NOT 
                                 ***** 16-BIT ADDRESS OF THE INSTRUCTION - NOT AN INDEX FOR THE LOOPTABLE.
                                 ***** NEED TO KEEP AN 8-BIT COUNTER FOR THE INSTRUCTION WE ARE ON.
                                 ; This bit finds the corresponding close bracket
-        LDAA    PC              ; Current value of program counter (i.e. current open bracket)
+        LDAA    INS             ; Current value of program counter (i.e. current open bracket)
         LDX     #LOOPTBL        ; reload the value of the start of the loop table
 OBLP    INX
         DECA
@@ -153,19 +153,33 @@ ISCLOSE                         ; If the byte at the data pointer is nonzero, th
         BRA     NEXT
         ; Move the instruction pointer to the command after the corresponding open bracket
 CBINCIP
-                                ; This bit finds the corresponding open bracket
-        LDAA    PC             ; Current value of program counter (i.e. current open bracket)
+                                ; This bit gets the correct index of the loop table.
+        LDAA    INS             ; Current value of instruction (i.e. current close bracket)
         LDX     #LOOPTBL        ; reload the value of the start of the loop table
-CBLP    INX
+CBLP1   INX
         DECA
-        BNE     CBLP
-        LDAA    0,X
+        BNE     CBLP1
+        INX                     ; Point at the next instruction in the loop table
+        LDAA    0,X             ; AccB now contains the address of the corresponding open bracket
+        LDX     #LOOPTBL        ; reload the value of the start of the loop table
+        ; CLOSE BRACKET OK TILL HERE
+
+        LDX     #PROGRAM        ; Get the start of the program's instructions
+        
+        DEX 
+        CLR     INS             ; Clear instruction counter
+CBLP2   INX                     ; Increment the X register until the PC gets to the correct address
+        DECA
+        INC     INS 
+        BNE     CBLP2
+        STX     PC              ; Store the value of PC pointing to the corresponding open bracket
         BRA     NEXT            ; this increments the PC by 1, sending flow to the command after the corresponding open bracket
 
 
 NEXT    LDX     PC             ; Increment program counter and store it before going back to the next
         INX                    ; instruction
         STX     PC
+        INC     INS            ; Increment instruction counter
         JMP     AROUND         ; Go to the next instruction
 
 ; Subroutines

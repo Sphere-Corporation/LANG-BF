@@ -96,3 +96,16 @@ flowchart TD;
     MAIN --> G[build.asm];
 style G fill:#fff,stroke:#f66,stroke-width:2px,color:#000,stroke-dasharray: 5 5;
 ```
+
+
+Loop Cell contents:
+
+42x0
+2A
+0
+0
+0
+2E
+
+Loop cell address = $F00
+extract 50 bytes
