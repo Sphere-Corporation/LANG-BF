@@ -172,6 +172,50 @@ def build_complete(silent):
         if not(silent):
             click.secho('Build is complete.' + CR, fg=SUCCESSCOLOR)
             
+            
+def get_parameters(config, THIS_CONFIG_FILE):
+    convertEXEDir   = default_key(config["Locations"], "convertEXEDir", "N/A", True, "Locations", THIS_CONFIG_FILE)
+    srcDir          = default_key(config["Locations"], "srcDir", "N/A", True, "Locations", THIS_CONFIG_FILE)
+    outputDir       = default_key(config["Locations"], "outputDir", "N/A", True, "Locations", THIS_CONFIG_FILE)
+    
+    sourceFile      = default_key(config["BuildParameters"], "sourceFile", "N/A",True,"BuildParameters", THIS_CONFIG_FILE)                
+    assembledFile   = default_key(config["BuildParameters"], "assembledFile", "N/A", True,"BuildParameters", THIS_CONFIG_FILE)
+    prefix          = default_key(config["BuildParameters"],"prefix", "N/A", True,"BuildParameters", THIS_CONFIG_FILE)
+    base            = default_key(config["BuildParameters"],"base", "", True,"BuildParameters", THIS_CONFIG_FILE)
+    title           = default_key(config["BuildParameters"],"title", "", True,"BuildParameters", THIS_CONFIG_FILE)
+    vcass           = default_key(config["BuildParameters"],"vcass", "NONE", False,"BuildParameters", THIS_CONFIG_FILE)
+    vcass2          = default_key(config["BuildParameters"],"vcass2", "NONE", False,"BuildParameters", THIS_CONFIG_FILE)
+    js              = default_key(config["BuildParameters"],"js", "", False,"BuildParameters", THIS_CONFIG_FILE)
+    flags           = default_key(config["BuildParameters"],"flags", None, False,"BuildParameters", THIS_CONFIG_FILE)
+    cassette        = default_key(config["BuildParameters"],"cassette", "", False,"BuildParameters", THIS_CONFIG_FILE)
+    
+    buildASM            = default_key(config["Miscellaneous"],"buildASM", "", True,"Miscellaneous", THIS_CONFIG_FILE)
+    buildJustify        = default_key(config["Miscellaneous"],"buildJustify", "", False,"Miscellaneous", THIS_CONFIG_FILE)
+    NLAfterBuildVersion = default_key(config["Miscellaneous"],"NLAfterBuildVersion", True, False,"Miscellaneous", THIS_CONFIG_FILE)
+    return     convertEXEDir, srcDir, outputDir, sourceFile, assembledFile, prefix, base, title, vcass, vcass2, js, flags, cassette,\
+                buildASM, buildJustify, NLAfterBuildVersion
+    
+def get_cmds(vcass, vcass2, js, cassette):
+    ''' Gather together the list of commands '''
+    vcass_cmd = ""
+    if vcass != "NONE":
+        vcass_cmd = " --vcass " + vcass
+    
+    vcass2_cmd = ""
+    if vcass2 != "NONE":
+        vcass2_cmd = " --vcass2 " + vcass2
+        
+    js_cmd = ""
+    if js != '':
+        js_cmd = " --js " + js
+
+    cassette_cmd = ""
+    if cassette != '':
+        cassette_cmd = " --cassette " + cassette
+                    
+    return js_cmd + cassette_cmd + vcass_cmd + vcass2_cmd
+
+    
 def assemble_source_code(silent, srcDir, assemblerDir, assembler, sourceFile):
     if not(silent):
         click.secho('Assembling source code.', fg=INFOCOLOR)
@@ -253,29 +297,14 @@ def cli(config, build, silent):
     # Check supply of the specific build configuration file
     config = open_configuration_file(THIS_CONFIG_FILE, CONFIG_FILE_DOES_NOT_EXIST, silent, 'Build Configuration');
  
+    # Validate all sections of the main build configuration file
     validate_section(config,"Locations", silent,1, THIS_CONFIG_FILE)
     validate_section(config,"BuildParameters", silent,32, THIS_CONFIG_FILE)
     validate_section(config,"Miscellaneous", silent,32, THIS_CONFIG_FILE)
         
-    # Validate non-blankness of mandatory parameters
-    
-    convertEXEDir   = default_key(config["Locations"], "convertEXEDir", "N/A", True, "Locations", THIS_CONFIG_FILE)
-    srcDir          = default_key(config["Locations"], "srcDir", "N/A", True, "Locations", THIS_CONFIG_FILE)
-    outputDir       = default_key(config["Locations"], "outputDir", "N/A", True, "Locations", THIS_CONFIG_FILE)
-    sourceFile      = default_key(config["BuildParameters"], "sourceFile", "N/A",True,"BuildParameters", THIS_CONFIG_FILE)                
-    assembledFile   = default_key(config["BuildParameters"], "assembledFile", "N/A", True,"BuildParameters", THIS_CONFIG_FILE)
-    prefix          = default_key(config["BuildParameters"],"prefix", "N/A", True,"BuildParameters", THIS_CONFIG_FILE)
-    base            = default_key(config["BuildParameters"],"base", "", True,"BuildParameters", THIS_CONFIG_FILE)
-    title           = default_key(config["BuildParameters"],"title", "", True,"BuildParameters", THIS_CONFIG_FILE)
-    vcass           = default_key(config["BuildParameters"],"vcass", "NONE", False,"BuildParameters", THIS_CONFIG_FILE)
-    vcass2          = default_key(config["BuildParameters"],"vcass2", "NONE", False,"BuildParameters", THIS_CONFIG_FILE)
-    js              = default_key(config["BuildParameters"],"js", "", False,"BuildParameters", THIS_CONFIG_FILE)
-    flags           = default_key(config["BuildParameters"],"flags", None, False,"BuildParameters", THIS_CONFIG_FILE)
-    cassette        = default_key(config["BuildParameters"],"cassette", "", False,"BuildParameters", THIS_CONFIG_FILE)
-    
-    buildASM            = default_key(config["Miscellaneous"],"buildASM", "", True,"Miscellaneous", THIS_CONFIG_FILE)
-    buildJustify        = default_key(config["Miscellaneous"],"buildJustify", "", False,"Miscellaneous", THIS_CONFIG_FILE)
-    NLAfterBuildVersion = default_key(config["Miscellaneous"],"NLAfterBuildVersion", True, False,"Miscellaneous", THIS_CONFIG_FILE)
+    # Return main build parameters
+    convertEXEDir, srcDir, outputDir, sourceFile, assembledFile, prefix, base, title, vcass, vcass2, js, flags, \
+    cassette, buildASM, buildJustify, NLAfterBuildVersion = get_parameters(config, THIS_CONFIG_FILE)
     
     ''' Ensure that the NLAfterBuildVersion is the correct format for usage '''
     NLAfterBuildVersion = CamelCase(str(NLAfterBuildVersion))
@@ -286,40 +315,21 @@ def cli(config, build, silent):
     ''' Assemble the source code '''
     assemble_source_code(silent, srcDir, assemblerDir, assembler, sourceFile  )
     
-    
-    # Create the flags from the config file
+
+    # Create the flags for the command line
     fl = ""
     for flag in flags:
         fl = " --" + flag + fl
-    
-    vcass_cmd = ""
-    if vcass != "NONE":
-        vcass_cmd = " --vcass " + vcass
-    
-    vcass2_cmd = ""
-    if vcass2 != "NONE":
-        vcass2_cmd = " --vcass2 " + vcass2
-        
-    js_cmd = ""
-    if js != '':
-        js_cmd = " --js " + js
 
-    cassette_cmd = ""
-    if cassette != '':
-        cassette_cmd = " --cassette " + cassette
-                    
-    command = convertEXEDir + 'convertEXE --input ' + assembledFile +  ' --prefix ' + prefix + ' --base ' + base + ' --title ' + title + js_cmd + cassette_cmd + vcass_cmd + vcass2_cmd + ' --out ' + outputDir + ' --in ' + srcDir + ' ' + fl
+    # Create the commands to append to the command line
+    all_cmds = get_cmds(vcass, vcass2, js, cassette)   
+                        
+    command = convertEXEDir + 'convertEXE --input ' + assembledFile +  ' --prefix ' + prefix + ' --base ' + base + ' --title ' + title + all_cmds + ' --out ' + outputDir + ' --in ' + srcDir + ' ' + fl
     if not(silent):
         click.secho('Converting to other formats.' + CR, fg=INFOCOLOR)
 
     # Open a subprocess to run the command
-    #q = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True);
     q = subprocess.run(command, shell=True, check=True);
-
-    
-    
-    # Establish a connection to the process
-    #(output, err) = q.communicate()
 
     if not(silent) and q.stdout:
         click.secho(q.stdout.decode('ascii'), fg=INFOCOLOR)

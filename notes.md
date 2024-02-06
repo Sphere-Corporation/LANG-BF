@@ -69,14 +69,14 @@ Possibly support standard input where there is no input given
 
 Base SPHERE-1 has 4K of RAM available mapped out as below:
 
-|From*| To* |Size (bytes)                |        Purpose        |
-|-----|-----|:--------------------------:|-----------------------|
-|     |01FF |512                         |Reserved               |
-|0200 |05FF |1024                        |Interpreter            |
-|0A00 |0DFF |1024                        |Working Storage        |
-|0600 |08FE |1024                        |Program,Data & Input   |
-|09FF |0AFE |256                         |Tape storage           |
-|0E00 |0FFF |512                         |Stack (Starts at $E00)+|
+|From*| To* |Size (bytes)  |        Purpose        |
+|-----|-----|:------------:|-----------------------|
+|     |01FF |512           |Reserved               |
+|0200 |05FF |1024          |Interpreter            |
+|0A00 |0DFF |1024          |Working Storage        |
+|0600 |08FE |1024          |Program,Data & Input   |
+|09FF |0AFE |256           |Tape storage           |
+|0E00 |0FFF |512           |Stack (Starts at $E00)+|
 
 ***\**** Values in Hex
 
@@ -107,5 +107,18 @@ Loop Cell contents:
 0
 2E
 
+Data pointer address = $03A1
 Loop cell address = $F00
 extract 50 bytes
+
+
+
+
+NOTES FOR DRAWING ON CIRCUIT BOARD
+
+X1  Address Bus
+X2  Address Bus
+X3  Data Bus
+X4  I/O
+X5  I/O
+X6  Power Bus

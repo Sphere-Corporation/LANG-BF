@@ -28,12 +28,11 @@ OPENB   LDAA    BK             ; Load the current bracket position into AccA
         STX     LPSTP
         BRA     NXTP1 
 
-                               ; CLOSE BRACKET STUFF
-CLOSEB  LDX     LPSTP          ; MANAGEMENT OF THE LPSTP STACK IS FINE.....
-        DEX
-        LDAB    0,X             
-        STX     LPSTP          ;
-        STAB    LBI            ; loop_beginning_index is now stored
+CLOSEB  LDX     LPSTP          ; Get the address of the current internal stack pointer
+        DEX                    ; Decrement the stack pointer
+        LDAB    0,X            ; Load into AccB the value at the current stack pointer
+        STX     LPSTP          ; Store the stack pointer
+        STAB    LBI            ; Store the position in LBI
 
                                
                                ; DEFINITELY GOOD TO HERE.....

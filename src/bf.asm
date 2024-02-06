@@ -103,12 +103,12 @@ DECBTP  LDX     TP             ; Decrement the byte at the current tape pointer
         BRA     STASH
 
 INCTP   LDX     TP             ; Increment the current tape pointer
-        INX
-        STX     TP
+        INX                    ; CRUNCH THIS DOWN TO AN INC TP instruction
+        STX     TP      
         BRA     NEXT
 
 DECTP   LDX     TP             ; Decrement the current tape pointer
-        DEX
+        DEX                    ; CRUNCH THIS DOWN TO A DEC TP instruction
         STX     TP
         BRA     NEXT
 
@@ -132,9 +132,7 @@ ISOPEN
         BEQ     OBINCIP
         BRA     NEXT
         ; Move the instruction pointer to the command after the corresponding close bracket
-OBINCIP                         ***** I THINK THIS IS THE ISSUE - PC SHOULD NOT BE USED HERE - IT IS THE 
-                                ***** 16-BIT ADDRESS OF THE INSTRUCTION - NOT AN INDEX FOR THE LOOPTABLE.
-                                ***** NEED TO KEEP AN 8-BIT COUNTER FOR THE INSTRUCTION WE ARE ON.
+OBINCIP                         *******THIS NEEDS REWRITING - USE CLOSE BRACKET AS A MODEL ******
                                 ; This bit finds the corresponding close bracket
         LDAA    INS             ; Current value of program counter (i.e. current open bracket)
         LDX     #LOOPTBL        ; reload the value of the start of the loop table
@@ -143,6 +141,9 @@ OBLP    INX
         BNE     OBLP
         LDAA    0,X
         BRA     NEXT            ; this increments the PC by 1, sending flow to the command after the corresponding close bracket
+
+
+
 
 ISCLOSE                         ; If the byte at the data pointer is nonzero, then instead of moving the instruction pointer forward to 
                                 ;     the next command, jump it back to the command after the matching [ command.
@@ -156,9 +157,9 @@ CBINCIP
                                 ; This bit gets the correct index of the loop table.
         LDAA    INS             ; Current value of instruction (i.e. current close bracket)
         LDX     #LOOPTBL        ; reload the value of the start of the loop table
-CBLP1   INX
+CBLP    INX
         DECA
-        BNE     CBLP1
+        BNE     CBLP
         INX                     ; Point at the next instruction in the loop table
         LDAA    0,X             ; AccB now contains the address of the corresponding open bracket
         LDX     #LOOPTBL        ; reload the value of the start of the loop table
@@ -168,13 +169,14 @@ CBLP1   INX
         
         DEX 
         CLR     INS             ; Clear instruction counter
-CBLP2   INX                     ; Increment the X register until the PC gets to the correct address
+CBLPI   INX                     ; Increment the X register until the PC gets to the correct address
         DECA
         INC     INS 
-        BNE     CBLP2
+        BNE     CBLPI
         STX     PC              ; Store the value of PC pointing to the corresponding open bracket
         BRA     NEXT            ; this increments the PC by 1, sending flow to the command after the corresponding open bracket
-
+                                ; CAN PROBABLY LEAVE THIS OUT WHEN FULLY DEBUGGED - ONLY A DROP THRU - 
+                                ; WASTES 3 BYTES
 
 NEXT    LDX     PC             ; Increment program counter and store it before going back to the next
         INX                    ; instruction
