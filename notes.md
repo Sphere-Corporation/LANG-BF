@@ -45,8 +45,8 @@ These notes are for use during development
 | **.**   |  Output the byte at the data pointer. |
 | **<**   |  Decrement the data pointer by one (to point to the next cell to the left). |
 | **>**   | Increment the data pointer by one (to point to the next cell to the right). |
-| **[**   |  If the byte at the data pointer is zero, then instead of moving the instruction pointer forward to the next command, jump it forward to the command after the matching ] command. |
-| **]**   |  If the byte at the data pointer is nonzero, then instead of moving the instruction pointer forward to the next command, jump it back to the command after the matching [ command. |
+| **[**   |  If the byte at the data pointer is zero, then instead of moving the instruction pointer forward to the next command, jump it forward to the command after the matching **]** command. |
+| **]**   |  If the byte at the data pointer is nonzero, then instead of moving the instruction pointer forward to the next command, jump it back to the command after the matching **[** command. |
 
 ## BF Specification (as canonical as I can find)
 
@@ -114,11 +114,3 @@ extract 50 bytes
 
 
 
-NOTES FOR DRAWING ON CIRCUIT BOARD
-
-X1  Address Bus
-X2  Address Bus
-X3  Data Bus
-X4  I/O
-X5  I/O
-X6  Power Bus

@@ -45,4 +45,4 @@ TODO:
 |Error Code |Meaning| Notes |
 |-----------|-------|-------|
 | E001      |Program length exceeds 255 instructions| This will cause execution to cease when the 255th instruction has been reached and executed|
-| E001      |Tape storage length exceeds length > 255 instructions||
+| E002      |Tape storage length exceeds length > 255 instructions||

@@ -27,20 +27,34 @@ REPL    LDX     #PROMPT
         JSR     PUTMSG
         JSR     INPCHR
 
+CHKPRG
+        CLRA   
+        LDX     #PROGRAM       ; Store initial program address in X
+CKPRGLP
+        
+        INCA
+        LDAB    0,X            ; Get the instruction at the program counter
+        CMPA    MAXPROG
+        BEQ     PRG2LNG
+        INX
+        CMPB    #0
+        BNE     CKPRGLP        ; Cycle until the end of the program
+         
+        BRA     RUNP
+PRG2LNG LDX     #E001          ; Show error message
+        JSR     PUTMSG 
+        BRA     REPL       
+
 RUNP
         LDX     #TAPE          ; Store initial tape pointer address in TP
-CLRTP   ;STX     TP
-
-; Need to reset tape storage to 256 zeros
+        STX     TP
+CLRTP
+                               ; Need to reset tape storage to 256 zeros
         CLR     0,X
         INX
         CPX     #EOTAPE        ; Cycle until the end of the 256 bytes of tape
         BNE     CLRTP
         
-        
-        LDX     #TAPE          ; Re-store initial tape pointer address in TP
-        STX     TP
-
         LDX     #INPUT         ; Store initial input pointer address in IP
         STX     IP
         
@@ -162,8 +176,7 @@ CBLP    INX
         BNE     CBLP
         INX                     ; Point at the next instruction in the loop table
         LDAA    0,X             ; AccB now contains the address of the corresponding open bracket
-        LDX     #LOOPTBL        ; reload the value of the start of the loop table
-        ; CLOSE BRACKET OK TILL HERE
+;        LDX     #LOOPTBL        ; reload the value of the start of the loop table
 
         LDX     #PROGRAM        ; Get the start of the program's instructions
         
