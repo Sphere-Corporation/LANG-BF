@@ -34,8 +34,12 @@ CLOSEB  LDX     LPSTP          ; Get the address of the current internal stack p
         STX     LPSTP          ; Store the stack pointer
         STAB    LBI            ; Store the position in LBI
 
-                               ; AccB contains LBI
-CLB2    LDAA    BK             
+                               
+                               ; DEFINITELY GOOD TO HERE.....
+        
+                               ; Remember, AccB contains LBI
+                               ; loop_table[loop_beginning_index] = bk
+CLB2    LDAA    BK             ; seems good till here
         LDX     #LOOPTBL       ; Reset the loop table value
         
 LOOPA   INX
@@ -43,7 +47,7 @@ LOOPA   INX
         BNE     LOOPA
         STAA    0,X 
         
-        ; loop_table[bk] = loop_beginning_index
+                               ; Store the beginning of the loop in the "end of loop" location
         LDAA    BK
         LDAB    LBI
         LDX     #LOOPTBL
@@ -51,6 +55,8 @@ LOOPB   INX
         DECA
         BNE     LOOPB
         STAB    0,X 
+                               ; I THINK WE ARE GOOD TO HERE..... :-)
+                              
 
 NXTP1   INC     BK
         LDX     PC             ; Increment program counter and store it before going back to the next

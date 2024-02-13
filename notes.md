@@ -45,8 +45,8 @@ These notes are for use during development
 | **.**   |  Output the byte at the data pointer. |
 | **<**   |  Decrement the data pointer by one (to point to the next cell to the left). |
 | **>**   | Increment the data pointer by one (to point to the next cell to the right). |
-| **[**   |  If the byte at the data pointer is zero, then instead of moving the instruction pointer forward to the next command, jump it forward to the command after the matching **]** command. |
-| **]**   |  If the byte at the data pointer is nonzero, then instead of moving the instruction pointer forward to the next command, jump it back to the command after the matching **[** command. |
+| **[**   |  If the byte at the data pointer is zero, then instead of moving the instruction pointer forward to the next command, jump it forward to the command after the matching ] command. |
+| **]**   |  If the byte at the data pointer is nonzero, then instead of moving the instruction pointer forward to the next command, jump it back to the command after the matching [ command. |
 
 ## BF Specification (as canonical as I can find)
 
@@ -97,7 +97,6 @@ flowchart TD;
 style G fill:#fff,stroke:#f66,stroke-width:2px,color:#000,stroke-dasharray: 5 5;
 ```
 
-
 Loop Cell contents:
 
 42x0
@@ -111,6 +110,22 @@ Data pointer address = $03A1
 Loop cell address = $F00
 extract 50 bytes
 
+<<<<<<< HEAD
+USEFUL SOFTWARE FOR MC6800 - MOTOROLA USERS GROUP SOFTWARE
+http://test.dankohn.info/~myhome/projects/68HC11/AXIOM_HC11/Source/Users%20Group/
+=======
 
 
 
+NOTES FOR DRAWING ON CIRCUIT BOARD
+
+X1  Address Bus
+X2  Address Bus
+X3  Data Bus
+X4  I/O
+X5  I/O
+X6  Power Bus
+<<<<<<< HEAD
+>>>>>>> parent of 1928731 (Added check for exceeding program length)
+=======
+>>>>>>> parent of 1928731 (Added check for exceeding program length)

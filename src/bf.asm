@@ -27,34 +27,20 @@ REPL    LDX     #PROMPT
         JSR     PUTMSG
         JSR     INPCHR
 
-CHKPRG
-        CLRA   
-        LDX     #PROGRAM       ; Store initial program address in X
-CKPRGLP
-        
-        INCA
-        LDAB    0,X            ; Get the instruction at the program counter
-        CMPA    MAXPROG
-        BEQ     PRG2LNG
-        INX
-        CMPB    #0
-        BNE     CKPRGLP        ; Cycle until the end of the program
-         
-        BRA     RUNP
-PRG2LNG LDX     #E001          ; Show error message
-        JSR     PUTMSG 
-        BRA     REPL       
-
 RUNP
         LDX     #TAPE          ; Store initial tape pointer address in TP
-        STX     TP
-CLRTP
-                               ; Need to reset tape storage to 256 zeros
+CLRTP   ;STX     TP
+
+; Need to reset tape storage to 256 zeros
         CLR     0,X
         INX
         CPX     #EOTAPE        ; Cycle until the end of the 256 bytes of tape
         BNE     CLRTP
         
+        
+        LDX     #TAPE          ; Re-store initial tape pointer address in TP
+        STX     TP
+
         LDX     #INPUT         ; Store initial input pointer address in IP
         STX     IP
         
@@ -104,7 +90,7 @@ DONE    JMP     REPL           ; End of program, so loop around for the next REP
 OUTPUT  LDX     TP             ; Output the character at the current tape pointer
         LDAA    0,X 
         JSR     PUTCHR
-        BRA     NEXT 
+        JMP     NEXT 
 
 INCBTP  LDX     TP             ; Increment the byte at the current tape pointer
         LDAA    0,X
@@ -116,10 +102,17 @@ DECBTP  LDX     TP             ; Decrement the byte at the current tape pointer
         DECA
         BRA     STASH
 
+
 INCTP   LDX     TP             ; Increment the current tape pointer
-        INX                    ; CRUNCH THIS DOWN TO AN INC TP instruction
+        INX                    
+        CPX     #EOTAPE         ; Have we exceeded the tape length ?
+        BEQ     TAP2LNG
         STX     TP      
         BRA     NEXT
+
+TAP2LNG LDX     #E002          ; Show error message
+        JSR     PUTMSG 
+        JMP     REPL  
 
 DECTP   LDX     TP             ; Decrement the current tape pointer
         DEX                    ; CRUNCH THIS DOWN TO A DEC TP instruction
@@ -176,7 +169,8 @@ CBLP    INX
         BNE     CBLP
         INX                     ; Point at the next instruction in the loop table
         LDAA    0,X             ; AccB now contains the address of the corresponding open bracket
-;        LDX     #LOOPTBL        ; reload the value of the start of the loop table
+        LDX     #LOOPTBL        ; reload the value of the start of the loop table
+        ; CLOSE BRACKET OK TILL HERE
 
         LDX     #PROGRAM        ; Get the start of the program's instructions
         
