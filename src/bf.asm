@@ -5,7 +5,7 @@
         .CR 6800               ; LOAD MC6800 CROSS OVERLAY
         .TF bf.exe,BIN         ; OUTPUT FILE IN BINARY FORMAT
         .OR $0200              ; START OF ASSEMBLY ADDRESS
-        .LI OFF                ; SWITCH OFF ASSEMBLY LISTING (EXCEPT ERRORS)
+        .LI   ON,MON,CON                ; SWITCH OFF ASSEMBLY LISTING (EXCEPT ERRORS)
         .SF SYMBOLS.SYM        ; CREATE SYMBOL FILE
 
 ; Main entry point
@@ -63,10 +63,10 @@ AROUND  LDX     PC
         BEQ     OUTPUT         ; If it is an output instruction, skip to the OUTPUT
 
         CMPA    PLUS           ;
-        BEQ     INCBTP         ; Is this an instruction to increment the byte at the tape pointer.
+        BEQ     INCTPB         ; Is this an instruction to increment the byte at the tape pointer.
 
         CMPA    MINUS          ;
-        BEQ     DECBTP         ; Is this an instruction to decrement the byte at the tape pointer.
+        BEQ     DECTPB         ; Is this an instruction to decrement the byte at the tape pointer.
 
         CMPA    GT             ;
         BEQ     INCTP          ; Is this an instruction to increment the tape pointer.
@@ -92,12 +92,12 @@ OUTPUT  LDX     TP             ; Output the character at the current tape pointe
         JSR     PUTCHR
         JMP     NEXT 
 
-INCBTP  LDX     TP             ; Increment the byte at the current tape pointer
+INCTPB  LDX     TP             ; Increment the byte at the current tape pointer
         LDAA    0,X
         INCA
         BRA     STASH    
 
-DECBTP  LDX     TP             ; Decrement the byte at the current tape pointer
+DECTPB  LDX     TP             ; Decrement the byte at the current tape pointer
         LDAA    0,X
         DECA
         BRA     STASH
@@ -111,13 +111,17 @@ INCTP   LDX     TP             ; Increment the current tape pointer
         BRA     NEXT
 
 TAP2LNG LDX     #E002          ; Show error message
-        JSR     PUTMSG 
-        JMP     REPL  
+        JMP     ERR
 
 DECTP   LDX     TP             ; Decrement the current tape pointer
-        DEX                    ; CRUNCH THIS DOWN TO A DEC TP instruction
+        CPX     #TAPE           ; Is the tape pointer at the start of the tape?
+        BEQ     TAP2SHT
+        DEX                    
         STX     TP
         BRA     NEXT
+
+TAP2SHT LDX     #E003          ; Show error message
+        JMP     ERR
 
 INP     LDX     IP             ; Accept a byte of input from the input string
         LDAA    0,X            ; Get the byte of input pointed at by the input pointer
@@ -169,27 +173,30 @@ CBLP    INX
         BNE     CBLP
         INX                     ; Point at the next instruction in the loop table
         LDAA    0,X             ; AccB now contains the address of the corresponding open bracket
-        LDX     #LOOPTBL        ; reload the value of the start of the loop table
+        ;LDX     #LOOPTBL        ; reload the value of the start of the loop table
         ; CLOSE BRACKET OK TILL HERE
 
         LDX     #PROGRAM        ; Get the start of the program's instructions
-        
-        DEX 
-        CLR     INS             ; Clear instruction counter
-CBLPI   INX                     ; Increment the X register until the PC gets to the correct address
+CBLPX   INX
         DECA
-        INC     INS 
-        BNE     CBLPI
-        STX     PC              ; Store the value of PC pointing to the corresponding open bracket
-        BRA     NEXT            ; this increments the PC by 1, sending flow to the command after the corresponding open bracket
+        BNE     CBLPX
+        DEX                        ; Program counter should not point to the instruction after the open bracket
+TST     STX     PC
+        
+
                                 ; CAN PROBABLY LEAVE THIS OUT WHEN FULLY DEBUGGED - ONLY A DROP THRU - 
                                 ; WASTES 3 BYTES
+        ; test program' instruction counter i.e. X reg and PC should be pointing to 0F10 - next instruction should be a #$3E
+        ; maybe even do a JMP AROUND ?????
 
 NEXT    LDX     PC             ; Increment program counter and store it before going back to the next
         INX                    ; instruction
         STX     PC
         INC     INS            ; Increment instruction counter
         JMP     AROUND         ; Go to the next instruction
+
+ERR     JSR     PUTMSG         ; Output the stated error message
+        JMP     REPL  
 
 ; Subroutines
         .IN library            ; Include library routines

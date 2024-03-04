@@ -1,6 +1,19 @@
 ; Phase 1 :
+;         Check for an overlength program
 ;         Create the loop index tables for later processing by the [ and ] instructions
 
+        LDX     #PROGRAM
+        DEX
+        CLRB
+NXTC    INX
+        LDAA    0,X
+        CMPA    #0
+        BEQ     PHASE1
+        INCB
+        CMPB    MAXPROG
+        BNE     NXTC
+        LDX     #E001
+        JMP     ERR
 
 PHASE1  
         CLR     BK             ; Clear the instruction counter for Phase 1
