@@ -1,19 +1,3 @@
-![Sphere-F*** Logo](./sphere-bf-icon.png)
-# LANG-BF
-
-## Introduction
-A [SPHERE-1](https://sphere.computer) Interpreter for the classic [Esoteric Programming Language (esolang)](https://en.wikipedia.org/wiki/Esoteric_programming_language) BrainF***.
-
-This is not meant to be a tutorial for the Brainf***. language. For information about the language, see the very informative [Wikipedia entry](https://en.wikipedia.org/wiki/Brainfuck). 
-
-
-## Language Specification
-There is no official specification for the language, however, the minimal canonical specification does state the complete language grammar as part of the explanation as to what the language is about and what its purpose is.
-
-<https://esolangs.org/wiki/brainfuck>
-
-A list of [language characters](./doc/language.md) is included here for convenience.
-
 ## Implementation Specifics
 
 As noted in [this section](https://esolangs.org/wiki/brainfuck#Implementation_issues) of the [esolang wiki page for BrainF***](https://esolangs.org/wiki/brainfuck), there are various implementation specifics which need to be understood, since there is no accepted global standard for implementations.
@@ -46,8 +30,8 @@ Due to several limits imposed by the interpreter and the computer itself,
 
 ### Tape Storage Size
 Due to limited memory on the base Sphere-1 computer, the tape size is limited to ***255*** locations.
-Tape storage does **not** have negative values i.e. the tape pointer cannot be positioned beyond what is considered to be the first cell in the tape storage (location 0). 
-See *Errors Messages* below
+Tape storage does **not** have negative values i.e. the tape pointer cannot be positioned beyond what is considered to be the first cell in the tape storage (location 0).
+
 
 ## Error Messages
 This implementation of BrainF**k is capable of displaying error messages when specific conditions are reached or breached:
@@ -57,3 +41,6 @@ This implementation of BrainF**k is capable of displaying error messages when sp
 | E001      |Program length exceeds 255 instructions| This will cause execution to cease when the 255th instruction has been reached and executed|
 | E002      |Tape storage length exceeds length > 255 locations| This will cause the program to cease|
 | E003      |Tape storage pointer is less than cell zero| This will cause the program to cease|
+
+
+[Back to Main Page](../README.md)

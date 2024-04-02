@@ -2,18 +2,18 @@
 ;         Check for an overlength program
 ;         Create the loop index tables for later processing by the [ and ] instructions
 
-        LDX     #PROGRAM
-        DEX
-        CLRB
-NXTC    INX
-        LDAA    0,X
-        CMPA    #0
-        BEQ     PHASE1
-        INCB
-        CMPB    MAXPROG
-        BNE     NXTC
-        LDX     #E001
-        JMP     ERR
+        LDX     #PROGRAM      ; Get the start location of the program
+        DEX                   ; Reduce it by 1
+        CLRB                  ; Clear AccB
+NXTC    INX                   ; Increment X register by 1
+        LDAA    0,X           ; Load AccA with the value pointed at by the X register
+        CMPA    #0            ; Is it beyond the end of the program ?
+        BEQ     PHASE1        ; If it is, then go to the start of Phase 1 
+        INCB                  ; If not then increment the AccB 
+        CMPB    MAXPROG       ; Have we reached the upper limit of the allowable program length ?
+        BNE     NXTC          ; If not, cycle back around
+        LDX     #E001         ; If we have then load the error code 
+        JMP     ERR           ; Display the error code
 
 PHASE1  
         CLR     BK             ; Clear the instruction counter for Phase 1

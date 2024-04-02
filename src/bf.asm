@@ -105,7 +105,7 @@ DECTPB  LDX     TP             ; Decrement the byte at the current tape pointer
 
 INCTP   LDX     TP             ; Increment the current tape pointer
         INX                    
-        CPX     #EOTAPE         ; Have we exceeded the tape length ?
+        CPX     #EOTAPE        ; Have we exceeded the tape length ?
         BEQ     TAP2LNG
         STX     TP      
         BRA     NEXT
@@ -114,7 +114,7 @@ TAP2LNG LDX     #E002          ; Show error message
         JMP     ERR
 
 DECTP   LDX     TP             ; Decrement the current tape pointer
-        CPX     #TAPE           ; Is the tape pointer at the start of the tape?
+        CPX     #TAPE          ; Is the tape pointer at the start of the tape?
         BEQ     TAP2SHT
         DEX                    
         STX     TP
@@ -173,7 +173,6 @@ CBLP    INX
         BNE     CBLP
         INX                     ; Point at the next instruction in the loop table
         LDAA    0,X             ; AccB now contains the address of the corresponding open bracket
-        ;LDX     #LOOPTBL        ; reload the value of the start of the loop table
         ; CLOSE BRACKET OK TILL HERE
 
         LDX     #PROGRAM        ; Get the start of the program's instructions
