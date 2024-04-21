@@ -1,4 +1,4 @@
-#### Language characters
+# Language characters
 
 |Character| Function              |
 |---------|-----------------------|

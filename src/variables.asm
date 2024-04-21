@@ -9,14 +9,17 @@ LPSTP    .DA     2             ; Loop Stack Pointer
 BK       .DA     1             ; Pointer in program in phase 1
 LBI      .DA     2             ; Start of the loop indicated by the close bracket
 
+
+; HELLO WORLD PROGRAM
 ;PROGRAM  .AZ     />++++++++[-<+++++++++>]<.>>+>-[+]++>++>+++[>[->+++<<+++>]<<]>-----.>->+++..+++.>-.<<+[>[+>+]>>]<--------------.>>.+++.------.--------.>+.>+./
+
 ;PROGRAM  .AZ     />+++++++++++++++++++++++++++++++++.>++>>>[.-<]/
-PROGRAM  .AZ     /+++++>+++[<+>-]/
+;PROGRAM  .AZ     /+++++>+++[<+>-]/
 ;PROGRAM  .AZ     />>>>>>>>>>/
+
+;PROGRAM  .AZ     /+.+.+./
 
 INPUT    .AZ     /123/
 
 
-
-        
-
+    

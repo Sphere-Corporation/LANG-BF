@@ -8,7 +8,10 @@
         .LI   ON,MON,CON                ; SWITCH OFF ASSEMBLY LISTING (EXCEPT ERRORS)
         .SF SYMBOLS.SYM        ; CREATE SYMBOL FILE
 
-; Main entry point
+PROGRAM  .AZ     /+.+.+./
+         .NO     $300,$00        ; New origin - fill interim space with 0 to allow for program storage
+
+; Main entry point ($0300)
 ;         Contains controller for the complete BrainF**k interpreter
 ;         all other subroutines are called (in)directly from this.
 
@@ -16,6 +19,28 @@
 
 START   LDS     #$1FF          ; Stack below program
                                ; MUST be first line of code
+
+;; TRIAL OF EDITOR
+
+BUFADR  .EQU    $000C 
+BUFEND  .EQU    $000E 
+
+EDITOR  .EQU    $FC67
+REEDIT  .EQU    $FC73
+
+PRGBUFS .EQU    $0600
+PRGBUFE .EQU    $0700
+
+        LDX     #PROGRAM
+        STX     BUFADR
+        LDX     #PROGRAM + 256
+        STX     BUFEND
+        LDAA    #1
+        JSR     EDITOR
+
+;;        LDAA    1
+;;        JSR     REEDIT
+;; END OF TRIAL
 
         JSR     CLS            
         LDX     #BFMSG

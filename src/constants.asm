@@ -5,7 +5,6 @@
 
 MAXPROG .AS     #$FF           ; Maximum length of the program
 
-
 ; Error codes
 
 E001    .AZ     /E001/
@@ -16,6 +15,7 @@ E003    .AZ     /E003/
 
 ENTER   .AS     #$0D           ; ENTER Key
 ESCCHR  .AS     #$1B           ; ESCape Key
+EDIT    .AS     #$43           ; 'E' to enter editor
 
 ; Language characters
 
